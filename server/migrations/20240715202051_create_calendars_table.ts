@@ -2,8 +2,8 @@ import type { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
   return knex.schema.createTable('Calendars', function (table) {
-    table.increments('calendarId').primary();
-    table.integer('userId').notNullable().references('userId').inTable('Users');
+    table.uuid('calendarId').primary().defaultTo(knex.fn.uuid());
+    table.uuid('userId').notNullable().references('userId').inTable('Users');
     table.string('name', 100).notNullable();
     table.text('description');
     table.string('color', 7);

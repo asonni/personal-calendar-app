@@ -3,11 +3,11 @@ import type { Knex } from 'knex';
 export async function up(knex: Knex): Promise<void> {
   return knex.schema.createTable('SharedCalendars', function (table) {
     table
-      .integer('calendarId')
+      .uuid('calendarId')
       .notNullable()
       .references('calendarId')
       .inTable('Calendars');
-    table.integer('userId').notNullable().references('userId').inTable('Users');
+    table.uuid('userId').notNullable().references('userId').inTable('Users');
     table
       .enu('role', ['owner', 'editor', 'viewer'])
       .defaultTo('viewer')

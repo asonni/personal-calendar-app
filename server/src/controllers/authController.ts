@@ -1,21 +1,22 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { TUserSchema } from 'schemas/userSchema';
 
 import db from '../db/knex';
+import ErrorResponse from '../utils/errorResponse';
 import sendEmail from '../utils/sendEmail';
 
 dotenv.config({ path: '.env.local' });
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 const JWT_EXPIRE = process.env.JWT_EXPIRE as string;
-const RESET_PASSWORD_EXPIRATION = process.env
-  .RESET_PASSWORD_EXPIRATION as string;
-
-const JWT_COOKIE_EXPIRE: any = process.env.JWT_COOKIE_EXPIRE;
+const RESET_PASSWORD_EXPIRATION = parseInt(
+  process.env.RESET_PASSWORD_EXPIRATION
+);
+const JWT_COOKIE_EXPIRE = parseInt(process.env.JWT_COOKIE_EXPIRE);
 
 const sendTokenResponse = (
   user: TUserSchema,
@@ -48,7 +49,11 @@ const sendTokenResponse = (
   });
 };
 
-export const register = async (req: Request, res: Response) => {
+export const register = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const newUser = req.body;
 
   try {
@@ -63,7 +68,7 @@ export const register = async (req: Request, res: Response) => {
 
     sendTokenResponse(user[0], 201, req, res);
   } catch (error) {
-    res.status(500).json({ error: 'Database error' });
+    return next(new ErrorResponse('Database error', 500));
   }
 };
 
@@ -85,55 +90,103 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-export const requestPasswordReset = async (req: Request, res: Response) => {
+export const forgotPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const { email } = req.body;
 
   try {
     const user = await db('Users').where({ email }).first();
+
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const token = crypto.randomBytes(20).toString('hex');
-    const expiresAt = new Date(
-      Date.now() + Number(RESET_PASSWORD_EXPIRATION) * 60 * 60 * 1000
-    );
+    const resetToken = crypto.randomBytes(20).toString('hex');
 
-    await db('PasswordResets').insert({ email, token, expiresAt });
+    const token = crypto.createHash('sha256').update(resetToken).digest('hex');
 
-    const resetLink = `http://localhost:3000/reset-password?token=${token}`;
+    const expiresAt = Date.now() + RESET_PASSWORD_EXPIRATION * 60 * 1000;
 
-    await sendEmail({
-      email: email,
-      subject: 'Password Reset',
-      message: `Click the following link to reset your password: ${resetLink}`
-    });
+    await db('Users')
+      .update({
+        resetPasswordToken: token,
+        resetPasswordExpires: new Date(expiresAt),
+        updatedAt: new Date()
+      })
+      .where({ userId: user.userId });
+
+    const resetUrl = `${req.protocol}://${req.get(
+      'host'
+    )}/api/v1/auth/resetpassword/${resetToken}`;
+
+    const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a PUT request to: \n\n ${resetUrl}`;
+
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: 'Password Reset',
+        message
+      });
+
+      res.status(200).json({ success: true, data: 'Email sent' });
+    } catch (err) {
+      await db('Users')
+        .update({
+          resetPasswordToken: null,
+          resetPasswordExpires: null,
+          updatedAt: new Date()
+        })
+        .where({ userId: user.userId });
+
+      return next(new ErrorResponse('Email could not be sent', 500));
+    }
 
     res.status(200).json({ message: 'Password reset email sent' });
   } catch (error) {
-    res.status(500).json({ error: 'Database error' });
+    return next(new ErrorResponse('Database error', 500));
   }
 };
 
-export const resetPassword = async (req: Request, res: Response) => {
-  const { token, newPassword } = req.body;
+export const resetPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (!req.body.newPassword) {
+    return next(new ErrorResponse('New password field is required', 400));
+  }
+  // Get hashed token
+  const resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(req.params.resettoken)
+    .digest('hex');
 
   try {
-    const resetRequest = await db('PasswordResets').where({ token }).first();
-    if (!resetRequest || new Date(resetRequest.expiresAt) < new Date()) {
-      return res.status(400).json({ message: 'Invalid or expired token' });
+    const [user]: TUserSchema[] = await db('Users')
+      .select(['userId', 'resetPasswordExpires'])
+      .where({ resetPasswordToken });
+
+    if (!user || new Date(user.resetPasswordExpires).getTime() < Date.now()) {
+      return next(new ErrorResponse('Invalid token or has expired', 400));
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await bcrypt.hash(req.body.newPassword, 10);
 
     await db('Users')
-      .where({ email: resetRequest.email })
-      .update({ password: hashedPassword });
+      .update({
+        password: hashedPassword,
+        resetPasswordToken: null,
+        resetPasswordExpires: null,
+        passwordChangedAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where({ userId: user.userId });
 
-    await db('PasswordResets').where({ token }).delete();
-
-    res.status(200).json({ message: 'Password reset successfully' });
-  } catch (error) {
-    res.status(500).json({ error: 'Database error' });
+    return sendTokenResponse(user, 200, req, res);
+  } catch {
+    return next(new ErrorResponse('Database error', 500));
   }
 };

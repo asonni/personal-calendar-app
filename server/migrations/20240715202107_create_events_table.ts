@@ -2,9 +2,9 @@ import type { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
   return knex.schema.createTable('Events', function (table) {
-    table.increments('eventId').primary();
+    table.uuid('eventId').primary().defaultTo(knex.fn.uuid());
     table
-      .integer('calendarId')
+      .uuid('calendarId')
       .notNullable()
       .references('calendarId')
       .inTable('Calendars');
@@ -15,11 +15,7 @@ export async function up(knex: Knex): Promise<void> {
     table.timestamp('endTime').notNullable();
     table.boolean('allDay').defaultTo(false);
     table.string('recurrenceRule', 255);
-    table
-      .integer('createdBy')
-      .notNullable()
-      .references('userId')
-      .inTable('Users');
+    table.uuid('createdBy').notNullable().references('userId').inTable('Users');
     table.timestamp('createdAt').defaultTo(knex.fn.now()).notNullable();
     table.timestamp('updatedAt').defaultTo(knex.fn.now()).notNullable();
   });

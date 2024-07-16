@@ -2,12 +2,8 @@ import type { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
   return knex.schema.createTable('EventAttendees', function (table) {
-    table
-      .integer('eventId')
-      .notNullable()
-      .references('eventId')
-      .inTable('Events');
-    table.integer('userId').notNullable().references('userId').inTable('Users');
+    table.uuid('eventId').notNullable().references('eventId').inTable('Events');
+    table.uuid('userId').notNullable().references('userId').inTable('Users');
     table
       .enu('status', ['pending', 'accepted', 'declined'])
       .defaultTo('pending');

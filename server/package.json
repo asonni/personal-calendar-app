@@ -30,7 +30,8 @@
     "morgan": "^1.10.0",
     "nodemailer": "^6.9.14",
     "pm2": "^5.4.2",
-    "typebox": "^0.0.1"
+    "typebox": "^0.0.1",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
@@ -45,6 +46,7 @@
     "@types/morgan": "^1.9.9",
     "@types/nodemailer": "^6.4.15",
     "@types/util.promisify": "^1.0.8",
+    "@types/uuid": "^10.0.0",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.4.5",
     "eslint": "^8.57.0",

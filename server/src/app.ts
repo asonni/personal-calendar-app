@@ -4,6 +4,7 @@ import express, { Express, Request, Response } from 'express';
 import morgan from 'morgan';
 import path from 'path';
 
+import errorHandler from './middlewares/error';
 import api from './routes/api';
 
 const app: Express = express();
@@ -37,5 +38,7 @@ app.use('/api/v1', api);
 app.get('/*', (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
+
+app.use(errorHandler);
 
 export default app;

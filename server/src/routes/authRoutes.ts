@@ -1,9 +1,9 @@
 import { Router } from 'express';
 
 import {
+  forgotPassword,
   login,
   register,
-  requestPasswordReset,
   resetPassword
 } from '../controllers/authController';
 import validate from '../middlewares/validate';
@@ -13,7 +13,7 @@ const router = Router();
 
 router.post('/register', validate(UserSchema), register);
 router.post('/login', login);
-router.post('/request-password-reset', requestPasswordReset);
-router.post('/reset-password', resetPassword);
+router.post('/forgotpassword', forgotPassword);
+router.put('/resetpassword/:resettoken', resetPassword);
 
 export default router;

@@ -1,7 +1,7 @@
 import { Static, Type } from '@sinclair/typebox';
 
 export const UserSchema = Type.Object({
-  userId: Type.Optional(Type.Integer()),
+  userId: Type.Optional(Type.String({ format: 'uuid' })),
   email: Type.String({ format: 'email' }),
   firstName: Type.Optional(Type.String()),
   lastName: Type.Optional(Type.String()),
