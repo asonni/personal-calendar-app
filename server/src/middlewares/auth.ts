@@ -50,7 +50,7 @@ export const protect = asyncHandler(
       )) as TCustomJwtPayload;
 
       const currentUser: TUserSchema = await knex('Users')
-        .where({ userId: decoded.userId })
+        .where({ userId: decoded.id })
         .first();
 
       if (!currentUser) {

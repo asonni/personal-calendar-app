@@ -3,11 +3,12 @@ import crypto from 'crypto';
 import dotenv from 'dotenv';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { TUserSchema } from 'schemas/userSchema';
 
 import db from '../db/knex';
+import { TUserSchema } from '../schemas/userSchema';
 import ErrorResponse from '../utils/errorResponse';
 import sendEmail from '../utils/sendEmail';
+import { TAuthenticatedRequest } from '../utils/types';
 
 dotenv.config({ path: '.env.local' });
 
@@ -26,10 +27,7 @@ const sendTokenResponse = (
 ) => {
   const token = jwt.sign(
     {
-      id: user.userId,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName
+      id: user.userId
     },
     JWT_SECRET,
     {
@@ -49,6 +47,25 @@ const sendTokenResponse = (
   });
 };
 
+export const getMe = async (
+  req: TAuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const [user] = await db('Users')
+      .select(['firstName', 'lastName', 'email'])
+      .where({ userId: req.user.userId });
+
+    return res.status(200).json({
+      success: true,
+      data: user
+    });
+  } catch (error) {
+    return next(new ErrorResponse('Database error', 500));
+  }
+};
+
 export const register = async (
   req: Request,
   res: Response,
@@ -62,6 +79,8 @@ export const register = async (
     const user: TUserSchema[] = await db('Users')
       .returning(['userId', 'email', 'firstName', 'lastName'])
       .insert({
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
         email: newUser.email,
         password: hashedPassword
       });
@@ -77,14 +96,12 @@ export const login = async (req: Request, res: Response) => {
 
   try {
     const user = await db('Users').where({ email }).first();
+
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ userId: user.userId }, JWT_SECRET, {
-      expiresIn: JWT_EXPIRE
-    });
-    res.status(200).json({ token });
+    sendTokenResponse(user, 201, req, res);
   } catch (error) {
     res.status(500).json({ error: 'Database error' });
   }

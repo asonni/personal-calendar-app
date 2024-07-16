@@ -1,7 +1,7 @@
 import { Type } from '@sinclair/typebox';
 
 export const EventSchema = Type.Object({
-  eventId: Type.String({ format: 'uuid' }),
+  eventId: Type.Optional(Type.String({ format: 'uuid' })),
   calendarId: Type.String({ format: 'uuid' }),
   title: Type.String(),
   description: Type.Optional(Type.String()),
