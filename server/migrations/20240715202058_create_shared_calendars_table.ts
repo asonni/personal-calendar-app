@@ -3,15 +3,11 @@ import type { Knex } from 'knex';
 export async function up(knex: Knex): Promise<void> {
   return knex.schema.createTable('SharedCalendars', function (table) {
     table
-      .integer('calendar_id')
+      .integer('calendarId')
       .notNullable()
-      .references('calendar_id')
+      .references('calendarId')
       .inTable('Calendars');
-    table
-      .integer('user_id')
-      .notNullable()
-      .references('user_id')
-      .inTable('Users');
+    table.integer('userId').notNullable().references('userId').inTable('Users');
     table
       .enu('role', ['owner', 'editor', 'viewer'])
       .defaultTo('viewer')
@@ -20,7 +16,9 @@ export async function up(knex: Knex): Promise<void> {
       .enu('status', ['pending', 'accepted'])
       .defaultTo('pending')
       .notNullable();
-    table.primary(['calendar_id', 'user_id']);
+    table.primary(['calendarId', 'userId']);
+    table.timestamp('createdAt').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('updatedAt').defaultTo(knex.fn.now()).notNullable();
   });
 }
 

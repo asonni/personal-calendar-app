@@ -1,28 +1,25 @@
-import knex from 'db/knex';
 import { NextFunction, Request, Response } from 'express';
 import jwt, { JwtPayload, Secret } from 'jsonwebtoken';
 
-import ErrorResponse from '../utils/errorResponse';
+import knex from '../db/knex';
+import { TUserSchema } from '../schemas/userSchema';
 import asyncHandler from './async';
 
-interface TDecodedToken {
-  id: string;
+type TCustomJwtPayload = JwtPayload & {
+  userId: number;
   iat: number;
-}
-
-interface AuthenticatedRequest extends Request {
-  user?: any;
-}
+};
 
 // Protect routes
 export const protect = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     let token: string | undefined;
+
     const authorization = req.headers.authorization;
 
     if (authorization && authorization.startsWith('Bearer')) {
       // Set token from Bearer token in header
-      [, token] = authorization.split(' ');
+      token = authorization.split(' ')[1];
       // Set token from cookie
     } else if (req.cookies.token) {
       token = req.cookies.token;
@@ -30,9 +27,7 @@ export const protect = asyncHandler(
 
     // Make sure token exists
     if (!token) {
-      return next(
-        new ErrorResponse('Not authorized to access this route', 401)
-      );
+      return res.status(401).json({ error: 'Unauthorized' });
     }
 
     try {
@@ -49,55 +44,35 @@ export const protect = asyncHandler(
         });
       };
 
-      const decoded: JwtPayload = await jwtVerifyPromisified(
+      const decoded = (await jwtVerifyPromisified(
         token,
         process.env.JWT_SECRET
-      );
+      )) as TCustomJwtPayload;
 
-      const currentUser = await knex('Users')
-        .where({ userId: decoded.id })
+      const currentUser: TUserSchema = await knex('Users')
+        .where({ userId: decoded.userId })
         .first();
 
       if (!currentUser) {
-        return next(
-          new ErrorResponse(
-            'The user belonging to this token no longer exists.',
-            401
-          )
-        );
+        return res.status(401).json({
+          error: 'The user belonging to this token no longer exists.'
+        });
       }
 
-      if (currentUser.changedPasswordAfter(decoded.iat)) {
-        return next(
-          new ErrorResponse(
-            'User recently changed password! Please login again.',
-            401
-          )
-        );
+      if (
+        currentUser.passwordChangedAt &&
+        decoded.iat * 1000 < new Date(currentUser.passwordChangedAt).getTime()
+      ) {
+        return res.status(401).json({
+          error: 'User recently changed password! Please login again.'
+        });
       }
 
-      req.user = currentUser;
+      (req as any).user = currentUser;
 
       return next();
     } catch (error) {
-      return next(
-        new ErrorResponse('Not authorized to access this route', 401)
-      );
+      return res.status(401).json({ error: 'Unauthorized' });
     }
   }
 );
-
-// Grant access to specific roles
-export const authorize = (...roles: string[]) => {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    if (!roles.includes(req.user.role)) {
-      return next(
-        new ErrorResponse(
-          `User role ${req.user.role} is not authorized to access this route`,
-          403
-        )
-      );
-    }
-    return next();
-  };
-};

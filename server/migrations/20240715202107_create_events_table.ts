@@ -2,26 +2,26 @@ import type { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
   return knex.schema.createTable('Events', function (table) {
-    table.increments('event_id').primary();
+    table.increments('eventId').primary();
     table
-      .integer('calendar_id')
+      .integer('calendarId')
       .notNullable()
-      .references('calendar_id')
+      .references('calendarId')
       .inTable('Calendars');
     table.string('title', 255).notNullable();
     table.text('description');
     table.string('location', 255);
-    table.timestamp('start_time').notNullable();
-    table.timestamp('end_time').notNullable();
-    table.boolean('all_day').defaultTo(false);
-    table.string('recurrence_rule', 255);
+    table.timestamp('startTime').notNullable();
+    table.timestamp('endTime').notNullable();
+    table.boolean('allDay').defaultTo(false);
+    table.string('recurrenceRule', 255);
     table
-      .integer('created_by')
+      .integer('createdBy')
       .notNullable()
-      .references('user_id')
+      .references('userId')
       .inTable('Users');
-    table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-    table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('createdAt').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('updatedAt').defaultTo(knex.fn.now()).notNullable();
   });
 }
 

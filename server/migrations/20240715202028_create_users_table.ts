@@ -2,15 +2,16 @@ import type { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
   return knex.schema.createTable('Users', function (table) {
-    table.increments('user_id').primary();
+    table.increments('userId').primary();
     table.string('email', 255).unique().notNullable();
-    table.string('first_name', 50);
-    table.string('last_name', 50);
+    table.string('firstName', 50);
+    table.string('lastName', 50);
     table.string('password', 255).notNullable();
-    table.string('reset_password_token', 255);
-    table.timestamp('reset_password_expires');
-    table.timestamp('password_changed_at');
-    table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
+    table.string('resetPasswordToken', 255);
+    table.timestamp('resetPasswordExpires');
+    table.timestamp('passwordChangedAt');
+    table.timestamp('createdAt').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('updatedAt').defaultTo(knex.fn.now()).notNullable();
   });
 }
 

@@ -1,35 +1,35 @@
-import { TypeCompiler } from '@sinclair/typebox/compiler';
-import { NextFunction, Request, Response } from 'express';
+import { Response } from 'express';
 
 import knex from '../db/knex';
-import asyncHandler from '../middlewares/async';
-import { CalendarSchema } from '../schemas/calendarSchema';
+import { TAuthenticatedRequest } from '../utils/types';
 
-const validateCalendar = TypeCompiler.Compile(CalendarSchema);
+export const getCalendars = async (
+  req: TAuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const calendars = await knex('Calendars')
+      .select('*')
+      .where({ userId: req.user.userId });
 
-export const getCalendars = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const users = await knex('Users').select('*');
-
-    res.status(200).json(users);
+    res.status(200).json({ data: calendars });
+  } catch (error) {
+    res.status(500).json({ error: 'Database error' });
   }
-);
+};
 
-export const createCalendar = async (req: Request, res: Response) => {
+export const createCalendar = async (
+  req: TAuthenticatedRequest,
+  res: Response
+) => {
   const newCalendar = req.body;
+  newCalendar.userId = 1;
 
-  if (validateCalendar.Check(newCalendar)) {
-    try {
-      await knex('Calendars').insert(newCalendar);
+  try {
+    await knex('Calendars').insert(newCalendar);
 
-      res.status(201).json({ message: 'Calendar created successfully' });
-    } catch (error) {
-      res.status(500).json({ error: 'Database error' });
-    }
-  } else {
-    res.status(400).json({
-      error: 'Validation failed',
-      details: validateCalendar.Errors(newCalendar)
-    });
+    res.status(201).json({ message: 'Calendar created successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Database error' });
   }
 };

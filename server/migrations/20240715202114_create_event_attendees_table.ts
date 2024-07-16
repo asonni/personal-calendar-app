@@ -3,19 +3,17 @@ import type { Knex } from 'knex';
 export async function up(knex: Knex): Promise<void> {
   return knex.schema.createTable('EventAttendees', function (table) {
     table
-      .integer('event_id')
+      .integer('eventId')
       .notNullable()
-      .references('event_id')
+      .references('eventId')
       .inTable('Events');
-    table
-      .integer('user_id')
-      .notNullable()
-      .references('user_id')
-      .inTable('Users');
+    table.integer('userId').notNullable().references('userId').inTable('Users');
     table
       .enu('status', ['pending', 'accepted', 'declined'])
       .defaultTo('pending');
-    table.primary(['event_id', 'user_id']);
+    table.primary(['eventId', 'userId']);
+    table.timestamp('createdAt').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('updatedAt').defaultTo(knex.fn.now()).notNullable();
   });
 }
 

@@ -1,26 +1,19 @@
-// import express from 'express';
+import { Router } from 'express';
 
-// import {
-//   forgotPassword,
-//   getMe,
-//   login,
-//   logout,
-//   register,
-//   resetPassword,
-//   updateDetails,
-//   updatePassword
-// } from '../controllers/authController';
-// import { protect } from '../middlewares/auth';
+import {
+  login,
+  register,
+  requestPasswordReset,
+  resetPassword
+} from '../controllers/authController';
+import validate from '../middlewares/validate';
+import { UserSchema } from '../schemas/userSchema';
 
-// const router = express.Router();
+const router = Router();
 
-// router.post('/register', register);
-// router.post('/login', login);
-// router.get('/logout', logout);
-// router.get('/me', protect, getMe);
-// router.put('/updatedetails', protect, updateDetails);
-// router.put('/updatepassword', protect, updatePassword);
-// router.post('/forgotpassword', forgotPassword);
-// router.put('/resetpassword/:resettoken', resetPassword);
+router.post('/register', validate(UserSchema), register);
+router.post('/login', login);
+router.post('/request-password-reset', requestPasswordReset);
+router.post('/reset-password', resetPassword);
 
-// export default router;
+export default router;
