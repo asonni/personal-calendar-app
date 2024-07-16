@@ -27,7 +27,7 @@ export const getCalendars = async (
 
     res.status(200).json(calendars);
   } catch (error) {
-    res.status(500).json({ error: 'Database error' });
+    res.status(500).json({ success: false, error: 'Database error' });
   }
 };
 
@@ -41,8 +41,10 @@ export const createCalendar = async (
   try {
     await db('Calendars').insert(newCalendar);
 
-    res.status(201).json({ message: 'Calendar created successfully' });
+    res
+      .status(201)
+      .json({ success: true, message: 'Calendar created successfully' });
   } catch (error) {
-    res.status(500).json({ error: 'Database error' });
+    res.status(500).json({ success: false, error: 'Database error' });
   }
 };

@@ -5,12 +5,14 @@ import { TAuthenticatedRequest } from '../utils/types';
 
 const validate = (schema: any) => {
   return (req: TAuthenticatedRequest, res: Response, next: NextFunction) => {
-    if (!!req.user.userId) {
+    if (!!req.user) {
       req.body.userId = req.user.userId;
     }
     const isValid = validateSchema(schema, req.body);
     if (!isValid) {
-      return res.status(400).json({ error: getSchemaErrors(schema, req.body) });
+      return res
+        .status(400)
+        .json({ success: false, error: getSchemaErrors(schema, req.body) });
     }
     next();
   };

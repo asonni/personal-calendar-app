@@ -4,6 +4,7 @@ import {
   forgotPassword,
   getMe,
   login,
+  logout,
   register,
   resetPassword
 } from '../controllers/authController';
@@ -14,6 +15,7 @@ import { UserSchema } from '../schemas/userSchema';
 const router = Router();
 
 router.post('/login', login);
+router.get('/logout', logout);
 router.get('/me', protect, getMe);
 router.post('/register', validate(UserSchema), register);
 router.post('/forgotpassword', forgotPassword);

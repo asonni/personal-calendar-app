@@ -16,7 +16,7 @@ export const getEvents = async (req: TAuthenticatedRequest, res: Response) => {
 
     res.status(200).json({ data: events });
   } catch (error) {
-    res.status(500).json({ error: 'Database error' });
+    res.status(500).json({ success: false, error: 'Database error' });
   }
 };
 
@@ -26,9 +26,11 @@ export const createEvent = async (req: Request, res: Response) => {
   if (validateEvent.Check(newEvent)) {
     try {
       await db('Events').insert(newEvent);
-      res.status(201).json({ message: 'Event created successfully' });
+      res
+        .status(201)
+        .json({ success: true, message: 'Event created successfully' });
     } catch (error) {
-      res.status(500).json({ error: 'Database error' });
+      res.status(500).json({ success: false, error: 'Database error' });
     }
   } else {
     res.status(400).json({

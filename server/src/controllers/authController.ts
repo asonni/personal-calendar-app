@@ -47,6 +47,19 @@ const sendTokenResponse = (
   });
 };
 
+export const logout = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  res.clearCookie('token');
+
+  return res.status(200).json({
+    success: true,
+    data: {}
+  });
+};
+
 export const getMe = async (
   req: TAuthenticatedRequest,
   res: Response,
@@ -98,12 +111,14 @@ export const login = async (req: Request, res: Response) => {
     const user = await db('Users').where({ email }).first();
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res
+        .status(401)
+        .json({ success: false, message: 'Invalid credentials' });
     }
 
     sendTokenResponse(user, 201, req, res);
   } catch (error) {
-    res.status(500).json({ error: 'Database error' });
+    res.status(500).json({ success: false, error: 'Database error' });
   }
 };
 
@@ -118,7 +133,9 @@ export const forgotPassword = async (
     const user = await db('Users').where({ email }).first();
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'User not found' });
     }
 
     const resetToken = crypto.randomBytes(20).toString('hex');
@@ -161,7 +178,9 @@ export const forgotPassword = async (
       return next(new ErrorResponse('Email could not be sent', 500));
     }
 
-    res.status(200).json({ message: 'Password reset email sent' });
+    res
+      .status(200)
+      .json({ success: true, message: 'Password reset email sent' });
   } catch (error) {
     return next(new ErrorResponse('Database error', 500));
   }

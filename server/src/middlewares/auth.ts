@@ -27,7 +27,7 @@ export const protect = asyncHandler(
 
     // Make sure token exists
     if (!token) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return res.status(401).json({ success: false, error: 'Unauthorized' });
     }
 
     try {
@@ -72,7 +72,7 @@ export const protect = asyncHandler(
 
       return next();
     } catch (error) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return res.status(401).json({ success: false, error: 'Unauthorized' });
     }
   }
 );
