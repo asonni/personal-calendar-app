@@ -1,0 +1,20 @@
+[
+  {
+    "calendarId": "75b5d32f-a635-4fd8-bb76-221647714f04",
+    "userId": "ea3b7087-0e89-4b1e-a4ec-1c0d455a6ffb",
+    "name": "My Work Calender 2",
+    "description": "Calendar that holds all my work routine 2",
+    "color": "1100FF",
+    "createdAt": "2024-07-17T15:21:08.641Z",
+    "updatedAt": "2024-07-17T15:21:08.641Z"
+  },
+  {
+    "calendarId": "b8cb0fe8-019a-42b2-838a-7f07a9f9ec14",
+    "userId": "ea3b7087-0e89-4b1e-a4ec-1c0d455a6ffb",
+    "name": "My Home Calender 1",
+    "description": "Calendar that holds all my daily routines Updated1",
+    "color": "0000F0",
+    "createdAt": "2024-07-17T13:31:33.455Z",
+    "updatedAt": "2024-07-17T17:31:03.178Z"
+  }
+]

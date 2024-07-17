@@ -1,0 +1,26 @@
+[
+  {
+    "userId": "ea3b7087-0e89-4b1e-a4ec-1c0d455a6ffb",
+    "email": "john.doe@gmail.com",
+    "firstName": "John",
+    "lastName": "Doe",
+    "password": "$2a$10$94gJejSCwn3L2JTLylvNQ.nnS.2SRYedmZT1YQefe53913cPHB30e",
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "passwordChangedAt": null,
+    "createdAt": "2024-07-17T13:31:27.055Z",
+    "updatedAt": "2024-07-17T13:31:27.055Z"
+  },
+  {
+    "userId": "2b4de2b8-0fb1-4561-a551-9d70c9ace6cf",
+    "email": "john.doe2@gmail.com",
+    "firstName": "John2",
+    "lastName": "Doe2",
+    "password": "$2a$10$3B4PG302z2DbKdczUwhwx.21FeCp3s1G43id09RFXXsKyCdfomZfi",
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null,
+    "passwordChangedAt": null,
+    "createdAt": "2024-07-17T16:38:42.499Z",
+    "updatedAt": "2024-07-17T16:38:42.499Z"
+  }
+]

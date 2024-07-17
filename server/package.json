@@ -10,7 +10,8 @@
     "db:migrate": "knex migrate:latest",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
-    "cluster": "pm2 start dist/src/server.js -i max"
+    "cluster": "pm2 start dist/src/server.js -i max",
+    "db:export": "rm -rf ./seeds && mkdir seeds && ts-node exportDatabase.ts"
   },
   "keywords": [],
   "author": "Aladdin Sonni <aladdin.sonni@gmail.com>",

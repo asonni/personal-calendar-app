@@ -1,0 +1,62 @@
+[
+  {
+    "eventId": "e931175d-db91-48af-b1f6-60ae63a6e1a5",
+    "calendarId": "b8cb0fe8-019a-42b2-838a-7f07a9f9ec14",
+    "title": "My New Event Title",
+    "description": "My New Event Description",
+    "location": "Tripoli, Libya",
+    "startTime": "2024-07-17T13:31:33.455Z",
+    "endTime": "2024-07-18T13:31:33.455Z",
+    "allDay": true,
+    "createdAt": "2024-07-17T13:44:01.224Z",
+    "updatedAt": "2024-07-17T13:44:01.224Z"
+  },
+  {
+    "eventId": "d5f02c64-816c-4633-8483-a34d2c0cbb46",
+    "calendarId": "b8cb0fe8-019a-42b2-838a-7f07a9f9ec14",
+    "title": "My New Event Title",
+    "description": "My New Event Description",
+    "location": "Tripoli, Libya",
+    "startTime": "2024-07-17T13:31:33.455Z",
+    "endTime": "2024-07-18T13:31:33.455Z",
+    "allDay": true,
+    "createdAt": "2024-07-17T13:46:01.648Z",
+    "updatedAt": "2024-07-17T13:46:01.648Z"
+  },
+  {
+    "eventId": "1c6a6291-8cb6-4ca2-b2e7-487aae2e0eda",
+    "calendarId": "b8cb0fe8-019a-42b2-838a-7f07a9f9ec14",
+    "title": "My New Event Title",
+    "description": "My New Event Description",
+    "location": "Tripoli, Libya",
+    "startTime": "2024-07-17T13:31:33.455Z",
+    "endTime": "2024-07-18T13:31:33.455Z",
+    "allDay": true,
+    "createdAt": "2024-07-17T14:54:16.032Z",
+    "updatedAt": "2024-07-17T14:54:16.032Z"
+  },
+  {
+    "eventId": "88d113fc-19aa-42ce-a2b6-33044a676e1c",
+    "calendarId": "b8cb0fe8-019a-42b2-838a-7f07a9f9ec14",
+    "title": "My New Event Title 2",
+    "description": "My New Event Description 2",
+    "location": "Tripoli, Libya",
+    "startTime": "2024-07-15T13:31:33.455Z",
+    "endTime": "2024-07-16T13:31:33.455Z",
+    "allDay": false,
+    "createdAt": "2024-07-17T14:59:27.112Z",
+    "updatedAt": "2024-07-17T14:59:27.112Z"
+  },
+  {
+    "eventId": "b69c7537-80aa-4504-8797-4a13ecee00c6",
+    "calendarId": "b8cb0fe8-019a-42b2-838a-7f07a9f9ec14",
+    "title": "Aladdin Sonni2",
+    "description": "My New Event Description 2",
+    "location": "Tripoli, Libya",
+    "startTime": "2024-07-15T13:31:33.455Z",
+    "endTime": "2024-07-16T13:31:33.455Z",
+    "allDay": false,
+    "createdAt": "2024-07-17T13:39:16.813Z",
+    "updatedAt": "2024-07-17T16:55:19.218Z"
+  }
+]
