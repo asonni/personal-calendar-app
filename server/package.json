@@ -46,7 +46,6 @@
     "@types/knex": "^0.16.1",
     "@types/morgan": "^1.9.9",
     "@types/nodemailer": "^6.4.15",
-    "@types/util.promisify": "^1.0.8",
     "@types/uuid": "^10.0.0",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.4.5",

@@ -1,4 +1,4 @@
-import { Type } from '@sinclair/typebox';
+import { Static, Type } from '@sinclair/typebox';
 
 export const CalendarSchema = Type.Object({
   calendarId: Type.Optional(Type.String({ format: 'uuid' })),
@@ -9,3 +9,5 @@ export const CalendarSchema = Type.Object({
   createdAt: Type.Optional(Type.String({ format: 'date-time' })),
   updatedAt: Type.Optional(Type.String({ format: 'date-time' }))
 });
+
+export type TCalendarSchema = Static<typeof CalendarSchema>;

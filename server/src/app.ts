@@ -1,11 +1,12 @@
 import cookieParser from 'cookie-parser';
 import cors, { CorsOptions } from 'cors';
-import express, { Express, Request, Response } from 'express';
+import express, { Express, NextFunction, Request, Response } from 'express';
 import morgan from 'morgan';
 import path from 'path';
 
 import errorHandler from './middlewares/error';
-import api from './routes/api';
+import api from './routes/apiRoutes';
+import ErrorResponse from './utils/errorResponse';
 
 const app: Express = express();
 
@@ -35,9 +36,15 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 
 app.use('/api/v1', api);
 
-app.get('/*', (req: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+app.use(errorHandler);
+
+app.all('*', (req: Request, res: Response, next: NextFunction) => {
+  next(new ErrorResponse(`Can't find ${req.originalUrl} on this server!`, 404));
 });
+
+// app.get('/*', (req: Request, res: Response) => {
+//   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+// });
 
 app.use(errorHandler);
 

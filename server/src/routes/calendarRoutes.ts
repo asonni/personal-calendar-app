@@ -2,15 +2,30 @@ import { Router } from 'express';
 
 import {
   createCalendar,
-  getCalendars
+  deleteCalendar,
+  getCalendar,
+  getCalendars,
+  updateCalendar
 } from '../controllers/calendarController';
 import { protect } from '../middlewares/auth';
 import validate from '../middlewares/validate';
-import { CalendarSchema } from './../schemas/calendarSchema';
+import { CalendarSchema } from '../schemas/calendarSchema';
+import eventRoutes from './eventRoutes';
 
 const router = Router();
 
-router.get('/', protect, getCalendars);
-router.post('/', protect, validate(CalendarSchema), createCalendar);
+// Re-route into other resource routers
+router.use('/:calendarId/events', eventRoutes);
+
+router
+  .route('/')
+  .get(protect, getCalendars)
+  .post(protect, validate(CalendarSchema), createCalendar);
+
+router
+  .route('/:calendarId')
+  .get(protect, getCalendar)
+  .put(protect, validate(CalendarSchema), updateCalendar)
+  .delete(protect, deleteCalendar);
 
 export default router;

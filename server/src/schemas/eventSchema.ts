@@ -1,4 +1,4 @@
-import { Type } from '@sinclair/typebox';
+import { Static, Type } from '@sinclair/typebox';
 
 export const EventSchema = Type.Object({
   eventId: Type.Optional(Type.String({ format: 'uuid' })),
@@ -9,8 +9,8 @@ export const EventSchema = Type.Object({
   startTime: Type.String({ format: 'date-time' }),
   endTime: Type.String({ format: 'date-time' }),
   allDay: Type.Optional(Type.Boolean()),
-  recurrenceRule: Type.Optional(Type.String()),
-  createdBy: Type.Integer(),
   createdAt: Type.Optional(Type.String({ format: 'date-time' })),
   updatedAt: Type.Optional(Type.String({ format: 'date-time' }))
 });
+
+export type TEventSchema = Static<typeof EventSchema>;

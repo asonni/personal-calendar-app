@@ -3,6 +3,7 @@ import jwt, { JwtPayload, Secret } from 'jsonwebtoken';
 
 import knex from '../db/knex';
 import { TUserSchema } from '../schemas/userSchema';
+import ErrorResponse from '../utils/errorResponse';
 import asyncHandler from './async';
 
 type TCustomJwtPayload = JwtPayload & {
@@ -27,7 +28,7 @@ export const protect = asyncHandler(
 
     // Make sure token exists
     if (!token) {
-      return res.status(401).json({ success: false, error: 'Unauthorized' });
+      return next(new ErrorResponse(`Unauthorized`, 401));
     }
 
     try {
@@ -72,7 +73,7 @@ export const protect = asyncHandler(
 
       return next();
     } catch (error) {
-      return res.status(401).json({ success: false, error: 'Unauthorized' });
+      return next(new ErrorResponse(`Unauthorized`, 401));
     }
   }
 );
