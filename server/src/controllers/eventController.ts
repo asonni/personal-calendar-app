@@ -5,6 +5,43 @@ import ErrorResponse from '../utils/errorResponse';
 import { queryWithHelpers } from '../utils/queryHelpers';
 import { TAuthenticatedRequest } from '../utils/types';
 
+export const getEvent = async (
+  req: TAuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const event = await db('Events')
+      .join('Calendars', 'Events.calendarId', '=', 'Calendars.calendarId')
+      .join('Users', 'Calendars.userId', '=', 'Users.userId')
+      .where({
+        'Calendars.calendarId': req.params.calendarId,
+        'Calendars.userId': req.user.userId,
+        'Events.eventId': req.params.eventId
+      })
+      .select(
+        'Events.*',
+        'Calendars.name as calendarName',
+        'Calendars.description as calendarDescription',
+        'Users.userId as userId',
+        'Users.firstName as userFirstName',
+        'Users.lastName as userLastName',
+        'Users.email as userEmail'
+      )
+      .first();
+
+    if (!event) {
+      return next(new ErrorResponse(`Event not found`, 404));
+    }
+
+    res.status(200).json({ success: true, data: event });
+  } catch (error) {
+    return next(
+      new ErrorResponse(`Something went wrong, please try again later`, 400)
+    );
+  }
+};
+
 export const getEvents = async (
   req: TAuthenticatedRequest,
   res: Response,
@@ -23,9 +60,20 @@ export const getEvents = async (
   try {
     const query = db('Events')
       .join('Calendars', 'Events.calendarId', '=', 'Calendars.calendarId')
-      .where('Calendars.calendarId', req.params.calendarId)
-      .where('Calendars.userId', req.user.userId)
-      .select('Events.*');
+      .join('Users', 'Calendars.userId', '=', 'Users.userId')
+      .where({
+        'Calendars.userId': req.user.userId,
+        'Calendars.calendarId': req.params.calendarId
+      })
+      .select(
+        'Events.*',
+        'Calendars.name as calendarName',
+        'Calendars.description as calendarDescription',
+        'Users.userId as userId',
+        'Users.firstName as userFirstName',
+        'Users.lastName as userLastName',
+        'Users.email as userEmail'
+      );
 
     const events = await queryWithHelpers(query, options);
 
@@ -52,6 +100,76 @@ export const createEvent = async (
     res
       .status(201)
       .json({ success: true, message: 'Event created successfully' });
+  } catch (error) {
+    return next(
+      new ErrorResponse(`Something went wrong, please try again later`, 400)
+    );
+  }
+};
+
+export const updateEvent = async (
+  req: TAuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  const { userId, ...rest } = req.body;
+  const { calendarId, eventId } = req.params;
+
+  try {
+    const calendar = await db('Calendars')
+      .where({ userId, calendarId })
+      .select('*')
+      .first();
+
+    if (!calendar) {
+      return next(new ErrorResponse(`Event not found`, 404));
+    }
+
+    const event = await db('Events')
+      .update({
+        ...rest,
+        updatedAt: new Date()
+      })
+      .where({
+        calendarId,
+        eventId
+      });
+
+    if (!event) {
+      return next(new ErrorResponse(`Event not found`, 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Event updated successfully'
+    });
+  } catch (error) {
+    console.log({ error });
+    return next(
+      new ErrorResponse(`Something went wrong, please try again later`, 400)
+    );
+  }
+};
+
+export const deleteEvent = async (
+  req: TAuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { calendarId, eventId } = req.params;
+
+    const event = await db('Events').where({ calendarId, eventId }).del();
+
+    if (!event) {
+      return next(new ErrorResponse(`Event not found`, 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Event deleted successfully',
+      data: eventId
+    });
   } catch (error) {
     return next(
       new ErrorResponse(`Something went wrong, please try again later`, 400)

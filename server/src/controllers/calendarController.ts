@@ -13,11 +13,12 @@ export const getCalendar = async (
   try {
     const calendar = await db('Calendars')
       .join('Users', 'Calendars.userId', '=', 'Users.userId')
-      .where('Calendars.userId', req.user.userId)
-      .where('Calendars.calendarId', req.params.calendarId)
+      .where({
+        'Calendars.userId': req.user.userId,
+        'Calendars.calendarId': req.params.calendarId
+      })
       .select(
         'Calendars.*',
-        'Users.userId as userId',
         'Users.firstName as userFirstName',
         'Users.lastName as userLastName',
         'Users.email as userEmail'
@@ -55,10 +56,9 @@ export const getCalendars = async (
   try {
     const query = db('Calendars')
       .join('Users', 'Calendars.userId', '=', 'Users.userId')
-      .where('Calendars.userId', req.user.userId)
+      .where({ 'Calendars.userId': req.user.userId })
       .select(
         'Calendars.*',
-        'Users.userId as userId',
         'Users.firstName as userFirstName',
         'Users.lastName as userLastName',
         'Users.email as userEmail'
@@ -79,10 +79,8 @@ export const createCalendar = async (
   res: Response,
   next: NextFunction
 ) => {
-  const newCalendar = req.body;
-
   try {
-    await db('Calendars').insert(newCalendar);
+    await db('Calendars').insert(req.body);
 
     res
       .status(201)
@@ -99,17 +97,16 @@ export const updateCalendar = async (
   res: Response,
   next: NextFunction
 ) => {
+  const userId = req.user.userId;
   const calendarId = req.params.calendarId;
 
   try {
     const calendar = await db('Calendars')
       .update({
-        name: req.body.name,
-        description: req.body.description,
-        color: req.body.color,
+        ...req.body,
         updatedAt: new Date()
       })
-      .where({ calendarId, userId: req.body.userId });
+      .where({ calendarId, userId });
 
     if (!calendar) {
       return next(new ErrorResponse(`Calendar not found`, 404));
@@ -121,7 +118,7 @@ export const updateCalendar = async (
     });
   } catch (error) {
     return next(
-      new ErrorResponse(`No calendar with the id of ${calendarId}`, 400)
+      new ErrorResponse(`Something went wrong, please try again later`, 400)
     );
   }
 };
@@ -142,7 +139,11 @@ export const deleteCalendar = async (
       return next(new ErrorResponse(`Calendar not found`, 404));
     }
 
-    res.status(200).json({ success: true, data: calendarId });
+    res.status(200).json({
+      success: true,
+      message: 'Calendar deleted successfully',
+      data: calendarId
+    });
   } catch (error) {
     return next(
       new ErrorResponse(`Something went wrong, please try again later`, 400)

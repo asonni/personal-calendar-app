@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: calendarapp
+    ports:
+      - '5432:5432'
+
+  api:
+    build: ./api
+    ports:
+      - '3000:3000'
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: calendarapp
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+    ports:
+      - '4200:4200'
+    depends_on:
+      - api

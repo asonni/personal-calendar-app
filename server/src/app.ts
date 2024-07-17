@@ -1,3 +1,4 @@
+import colors from 'colors';
 import cookieParser from 'cookie-parser';
 import cors, { CorsOptions } from 'cors';
 import express, { Express, NextFunction, Request, Response } from 'express';
@@ -7,6 +8,15 @@ import path from 'path';
 import errorHandler from './middlewares/error';
 import api from './routes/apiRoutes';
 import ErrorResponse from './utils/errorResponse';
+
+process.on('uncaughtException', (err: Error) => {
+  // eslint-disable-next-line no-console
+  console.log('UNCAUGHT EXCEPTION! Shutting down...'.red.bold);
+  // eslint-disable-next-line no-console
+  console.log(err.name, err.message);
+  // exit process
+  process.exit(1);
+});
 
 const app: Express = express();
 
@@ -26,6 +36,8 @@ const corsOptions: CorsOptions = {
     }
   }
 };
+
+colors.enable();
 
 app.use(cors(corsOptions));
 app.use(morgan('combined'));
