@@ -1,9 +1,6 @@
-import { config } from 'dotenv';
 import request from 'supertest';
 
 import app from '../../app';
-
-config({ path: '.env.local' });
 
 describe('Auth Controller', () => {
   it('should register a new user', async () => {

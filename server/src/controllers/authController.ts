@@ -1,16 +1,15 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import dotenv from 'dotenv';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import validator from 'validator';
 
 import db from '../db/knex';
+import asyncHandler from '../middlewares/async';
 import { TUserSchema } from '../schemas/userSchema';
 import ErrorResponse from '../utils/errorResponse';
 import sendEmail from '../utils/sendEmail';
 import { TAuthenticatedRequest } from '../utils/types';
-
-dotenv.config({ path: '.env.local' });
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 const JWT_EXPIRE = process.env.JWT_EXPIRE as string;
@@ -47,67 +46,65 @@ const sendTokenResponse = (
   });
 };
 
-export const logout = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  res.clearCookie('token');
+export const logout = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    res.clearCookie('token');
 
-  return res.status(200).json({
-    success: true,
-    token: null
-  });
-};
+    return res.status(200).json({
+      success: true,
+      token: null
+    });
+  }
+);
 
-export const getMe = async (
-  req: TAuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const [user] = await db('Users')
-      .select(['firstName', 'lastName', 'email'])
-      .where({ userId: req.user?.userId });
+export const getMe = asyncHandler(
+  async (req: TAuthenticatedRequest, res: Response, next: NextFunction) => {
+    const [user]: TUserSchema[] = await db('Users')
+      .where({ userId: req.user?.userId })
+      .select(['firstName', 'lastName', 'email']);
 
     return res.status(200).json({
       success: true,
       data: user
     });
-  } catch (error) {
-    return next(new ErrorResponse('Database error', 500));
   }
-};
+);
 
-export const register = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const newUser = req.body;
+export const register = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const newUser = req.body;
 
-  try {
     const hashedPassword = await bcrypt.hash(newUser.password, 10);
 
-    const user: TUserSchema[] = await db('Users')
-      .returning(['userId', 'email', 'firstName', 'lastName'])
+    const [user]: TUserSchema[] = await db('Users')
       .insert({
         firstName: newUser.firstName,
         lastName: newUser.lastName,
         email: newUser.email,
         password: hashedPassword
-      });
+      })
+      .returning(['userId', 'email', 'firstName', 'lastName']);
 
-    sendTokenResponse(user[0], 201, req, res);
-  } catch (error) {
-    return next(new ErrorResponse('Database error', 500));
+    sendTokenResponse(user, 201, req, res);
   }
-};
+);
 
-export const login = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+export const login = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { email, password } = req.body;
 
-  try {
+    if (!email || validator.isEmpty(email)) {
+      return next(new ErrorResponse('Email field is required', 400));
+    }
+
+    if (!validator.isEmail(email)) {
+      return next(new ErrorResponse('You must provide a valid email', 400));
+    }
+
+    if (!password || validator.isEmpty(password)) {
+      return next(new ErrorResponse('Password field is required', 400));
+    }
+
     const user = await db('Users').where({ email }).first();
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
@@ -117,19 +114,21 @@ export const login = async (req: Request, res: Response) => {
     }
 
     sendTokenResponse(user, 200, req, res);
-  } catch (error) {
-    res.status(500).json({ success: false, error: 'Database error' });
   }
-};
+);
 
-export const forgotPassword = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const { email } = req.body;
+export const forgotPassword = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { email } = req.body;
 
-  try {
+    if (!email || validator.isEmpty(email)) {
+      return next(new ErrorResponse('Email field is required', 400));
+    }
+
+    if (!validator.isEmail(email)) {
+      return next(new ErrorResponse('You must provide a valid email', 400));
+    }
+
     const user = await db('Users').where({ email }).first();
 
     if (!user) {
@@ -165,8 +164,10 @@ export const forgotPassword = async (
         message
       });
 
-      res.status(200).json({ success: true, data: 'Email sent' });
-    } catch (err) {
+      res
+        .status(200)
+        .json({ success: true, message: 'Password reset email sent' });
+    } catch {
       await db('Users')
         .update({
           resetPasswordToken: null,
@@ -177,33 +178,31 @@ export const forgotPassword = async (
 
       return next(new ErrorResponse('Email could not be sent', 500));
     }
-
-    res
-      .status(200)
-      .json({ success: true, message: 'Password reset email sent' });
-  } catch (error) {
-    return next(new ErrorResponse('Database error', 500));
   }
-};
+);
 
-export const resetPassword = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  if (!req.body.newPassword) {
-    return next(new ErrorResponse('New password field is required', 400));
-  }
-  // Get hashed token
-  const resetPasswordToken = crypto
-    .createHash('sha256')
-    .update(req.params.resettoken)
-    .digest('hex');
+export const resetPassword = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { newPassword } = req.body;
+    const { resettoken } = req.params;
 
-  try {
+    if (!newPassword || !validator.isEmpty(newPassword)) {
+      return next(new ErrorResponse('New password field is required', 400));
+    }
+
+    if (!resettoken || !validator.isEmpty(resettoken)) {
+      return next(new ErrorResponse('Reset token was not provided', 400));
+    }
+
+    // Get hashed token
+    const resetPasswordToken = crypto
+      .createHash('sha256')
+      .update(resettoken)
+      .digest('hex');
+
     const [user]: TUserSchema[] = await db('Users')
-      .select(['userId', 'resetPasswordExpires'])
-      .where({ resetPasswordToken });
+      .where({ resetPasswordToken })
+      .select(['userId', 'resetPasswordExpires']);
 
     if (!user || new Date(user.resetPasswordExpires!).getTime() < Date.now()) {
       return next(new ErrorResponse('Invalid token or has expired', 400));
@@ -222,7 +221,5 @@ export const resetPassword = async (
       .where({ userId: user.userId });
 
     return sendTokenResponse(user, 200, req, res);
-  } catch {
-    return next(new ErrorResponse('Database error', 500));
   }
-};
+);

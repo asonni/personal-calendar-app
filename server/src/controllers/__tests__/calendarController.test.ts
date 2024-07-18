@@ -1,10 +1,7 @@
-import { config } from 'dotenv';
 import request from 'supertest';
 
 import testDb from '../../../jest.setup';
 import app from '../../app';
-
-config({ path: '.env.local' });
 
 describe('Calendar Controller', () => {
   let token: string;
@@ -13,7 +10,6 @@ describe('Calendar Controller', () => {
     await testDb.migrate.rollback();
     await testDb.migrate.latest();
 
-    // @ts-ignore
     token = await global.register();
   });
 

@@ -1,23 +1,31 @@
 import { NextFunction, Response } from 'express';
+import validator from 'validator';
 
 import db from '../db/knex';
+import asyncHandler from '../middlewares/async';
 import ErrorResponse from '../utils/errorResponse';
 import { queryWithHelpers } from '../utils/queryHelpers';
 import { TAuthenticatedRequest } from '../utils/types';
 
-export const getEvent = async (
-  req: TAuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
+export const getEvent = asyncHandler(
+  async (req: TAuthenticatedRequest, res: Response, next: NextFunction) => {
+    const { calendarId, eventId } = req.params;
+
+    if (!validator.isUUID(calendarId)) {
+      return next(new ErrorResponse(`Calendar ID is not valid`, 400));
+    }
+
+    if (!validator.isUUID(eventId)) {
+      return next(new ErrorResponse(`Event ID is not valid`, 400));
+    }
+
     const event = await db('Events')
       .join('Calendars', 'Events.calendarId', '=', 'Calendars.calendarId')
       .join('Users', 'Calendars.userId', '=', 'Users.userId')
       .where({
-        'Calendars.calendarId': req.params.calendarId,
+        'Calendars.calendarId': calendarId,
         'Calendars.userId': req.user?.userId,
-        'Events.eventId': req.params.eventId
+        'Events.eventId': eventId
       })
       .select(
         'Events.*',
@@ -35,27 +43,22 @@ export const getEvent = async (
     }
 
     res.status(200).json({ success: true, data: event });
-  } catch (error) {
-    return next(new ErrorResponse('Event not found', 404));
   }
-};
+);
 
-export const getEvents = async (
-  req: TAuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  const options = {
-    page: parseInt(req.query.page as string, 10) || 1,
-    pageSize: parseInt(req.query.pageSize as string, 10) || 10,
-    sortBy: req.query.sortBy as string,
-    sortOrder: req.query.sortOrder as 'asc' | 'desc',
-    searchBy: req.query.searchBy as string,
-    searchValue: req.query.searchValue as string,
-    filterBy: req.query.filterBy as string,
-    filterValue: req.query.filterValue as string
-  };
-  try {
+export const getEvents = asyncHandler(
+  async (req: TAuthenticatedRequest, res: Response, next: NextFunction) => {
+    const options = {
+      page: parseInt(req.query.page as string, 10) || 1,
+      pageSize: parseInt(req.query.pageSize as string, 10) || 10,
+      sortBy: req.query.sortBy as string,
+      sortOrder: req.query.sortOrder as 'asc' | 'desc',
+      searchBy: req.query.searchBy as string,
+      searchValue: req.query.searchValue as string,
+      filterBy: req.query.filterBy as string,
+      filterValue: req.query.filterValue as string
+    };
+
     const query = db('Events')
       .join('Calendars', 'Events.calendarId', '=', 'Calendars.calendarId')
       .join('Users', 'Calendars.userId', '=', 'Users.userId')
@@ -76,37 +79,40 @@ export const getEvents = async (
     const events = await queryWithHelpers(query, options);
 
     res.status(200).json(events);
-  } catch (error) {
-    return next(new ErrorResponse('Failed to get events', 400));
   }
-};
+);
 
-export const createEvent = async (
-  req: TAuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  const { userId, ...rest } = req.body;
+export const createEvent = asyncHandler(
+  async (req: TAuthenticatedRequest, res: Response, next: NextFunction) => {
+    const { userId, ...rest } = req.body;
 
-  try {
-    await db('Events').insert(rest);
-    res
-      .status(201)
-      .json({ success: true, message: 'Event created successfully' });
-  } catch (error) {
-    return next(new ErrorResponse('Failed to create event', 400));
+    if (!validator.isUUID(rest.calendarId)) {
+      return next(new ErrorResponse(`Calendar ID is not valid`, 400));
+    }
+
+    const [event] = await db('Events').insert(rest).returning('*');
+
+    res.status(201).json({
+      success: true,
+      message: 'Event created successfully',
+      data: event
+    });
   }
-};
+);
 
-export const updateEvent = async (
-  req: TAuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  const { userId, ...rest } = req.body;
-  const { calendarId, eventId } = req.params;
+export const updateEvent = asyncHandler(
+  async (req: TAuthenticatedRequest, res: Response, next: NextFunction) => {
+    const { userId, ...rest } = req.body;
+    const { calendarId, eventId } = req.params;
 
-  try {
+    if (!validator.isUUID(calendarId)) {
+      return next(new ErrorResponse(`Calendar ID is not valid`, 400));
+    }
+
+    if (!validator.isUUID(eventId)) {
+      return next(new ErrorResponse(`Event ID is not valid`, 400));
+    }
+
     const calendar = await db('Calendars')
       .where({ userId, calendarId })
       .select('*')
@@ -134,19 +140,20 @@ export const updateEvent = async (
       success: true,
       message: 'Event updated successfully'
     });
-  } catch (error) {
-    console.log({ error });
-    return next(new ErrorResponse('Failed to update event', 400));
   }
-};
+);
 
-export const deleteEvent = async (
-  req: TAuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
+export const deleteEvent = asyncHandler(
+  async (req: TAuthenticatedRequest, res: Response, next: NextFunction) => {
     const { calendarId, eventId } = req.params;
+
+    if (!validator.isUUID(calendarId)) {
+      return next(new ErrorResponse(`Calendar ID is not valid`, 400));
+    }
+
+    if (!validator.isUUID(eventId)) {
+      return next(new ErrorResponse(`Event ID is not valid`, 400));
+    }
 
     const event = await db('Events').where({ calendarId, eventId }).del();
 
@@ -159,7 +166,5 @@ export const deleteEvent = async (
       message: 'Event deleted successfully',
       data: eventId
     });
-  } catch (error) {
-    return next(new ErrorResponse('Failed to delete event', 400));
   }
-};
+);

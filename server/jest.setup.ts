@@ -2,11 +2,11 @@ import knex from 'knex';
 import { Model } from 'objection';
 import request from 'supertest';
 
-import config from './knexfile';
+import configuration from './knexfile';
 import app from './src/app';
 
 // Initialize the test database connection
-const testDb = knex(config.test);
+const testDb = knex(configuration.test);
 
 // Set up Objection.js to use the test database
 Model.knex(testDb);
@@ -16,20 +16,20 @@ declare global {
 }
 
 beforeAll(async () => {
+  // Roll back any existing migrations to ensure a clean state
   await testDb.migrate.rollback();
-  await testDb.migrate.latest();
-});
-
-beforeEach(async () => {
-  await testDb.migrate.rollback();
+  // Run the latest migrations to set up the database schema
   await testDb.migrate.latest();
 });
 
 afterAll(async () => {
+  // Roll back all migrations to clean up the database
   await testDb.migrate.rollback();
+  // Close the database connection
   await testDb.destroy();
 });
 
+// Add the register function to the global object
 global.register = async () => {
   const response = await request(app)
     .post('/api/v1/auth/register')
