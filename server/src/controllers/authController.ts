@@ -15,9 +15,9 @@ dotenv.config({ path: '.env.local' });
 const JWT_SECRET = process.env.JWT_SECRET as string;
 const JWT_EXPIRE = process.env.JWT_EXPIRE as string;
 const RESET_PASSWORD_EXPIRATION = parseInt(
-  process.env.RESET_PASSWORD_EXPIRATION
+  process.env.RESET_PASSWORD_EXPIRATION!
 );
-const JWT_COOKIE_EXPIRE = parseInt(process.env.JWT_COOKIE_EXPIRE);
+const JWT_COOKIE_EXPIRE = parseInt(process.env.JWT_COOKIE_EXPIRE!);
 
 const sendTokenResponse = (
   user: TUserSchema,
@@ -68,7 +68,7 @@ export const getMe = async (
   try {
     const [user] = await db('Users')
       .select(['firstName', 'lastName', 'email'])
-      .where({ userId: req.user.userId });
+      .where({ userId: req.user?.userId });
 
     return res.status(200).json({
       success: true,
@@ -116,7 +116,7 @@ export const login = async (req: Request, res: Response) => {
         .json({ success: false, message: 'Invalid credentials' });
     }
 
-    sendTokenResponse(user, 201, req, res);
+    sendTokenResponse(user, 200, req, res);
   } catch (error) {
     res.status(500).json({ success: false, error: 'Database error' });
   }
@@ -205,7 +205,7 @@ export const resetPassword = async (
       .select(['userId', 'resetPasswordExpires'])
       .where({ resetPasswordToken });
 
-    if (!user || new Date(user.resetPasswordExpires).getTime() < Date.now()) {
+    if (!user || new Date(user.resetPasswordExpires!).getTime() < Date.now()) {
       return next(new ErrorResponse('Invalid token or has expired', 400));
     }
 

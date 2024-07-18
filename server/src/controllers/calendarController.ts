@@ -14,7 +14,7 @@ export const getCalendar = async (
     const calendar = await db('Calendars')
       .join('Users', 'Calendars.userId', '=', 'Users.userId')
       .where({
-        'Calendars.userId': req.user.userId,
+        'Calendars.userId': req.user?.userId,
         'Calendars.calendarId': req.params.calendarId
       })
       .select(
@@ -56,7 +56,7 @@ export const getCalendars = async (
   try {
     const query = db('Calendars')
       .join('Users', 'Calendars.userId', '=', 'Users.userId')
-      .where({ 'Calendars.userId': req.user.userId })
+      .where({ 'Calendars.userId': req.user?.userId })
       .select(
         'Calendars.*',
         'Users.firstName as userFirstName',
@@ -97,7 +97,7 @@ export const updateCalendar = async (
   res: Response,
   next: NextFunction
 ) => {
-  const userId = req.user.userId;
+  const userId = req.user?.userId;
   const calendarId = req.params.calendarId;
 
   try {
@@ -132,7 +132,7 @@ export const deleteCalendar = async (
     const calendarId = req.params.calendarId;
 
     const calendar = await db('Calendars')
-      .where({ calendarId, userId: req.user.userId })
+      .where({ calendarId, userId: req.user?.userId })
       .del();
 
     if (!calendar) {

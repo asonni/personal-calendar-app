@@ -47,7 +47,7 @@ export const protect = asyncHandler(
 
       const decoded = (await jwtVerifyPromisified(
         token,
-        process.env.JWT_SECRET
+        process.env.JWT_SECRET!
       )) as TCustomJwtPayload;
 
       const currentUser: TUserSchema = await knex('Users')

@@ -40,7 +40,10 @@ const corsOptions: CorsOptions = {
 colors.enable();
 
 app.use(cors(corsOptions));
-app.use(morgan('combined'));
+
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('combined'));
+}
 
 app.use(express.json());
 app.use(cookieParser());

@@ -16,7 +16,7 @@ export const getEvent = async (
       .join('Users', 'Calendars.userId', '=', 'Users.userId')
       .where({
         'Calendars.calendarId': req.params.calendarId,
-        'Calendars.userId': req.user.userId,
+        'Calendars.userId': req.user?.userId,
         'Events.eventId': req.params.eventId
       })
       .select(
@@ -62,7 +62,7 @@ export const getEvents = async (
       .join('Calendars', 'Events.calendarId', '=', 'Calendars.calendarId')
       .join('Users', 'Calendars.userId', '=', 'Users.userId')
       .where({
-        'Calendars.userId': req.user.userId,
+        'Calendars.userId': req.user?.userId,
         'Calendars.calendarId': req.params.calendarId
       })
       .select(
