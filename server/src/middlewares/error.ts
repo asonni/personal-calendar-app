@@ -73,7 +73,10 @@ const errorHandler = (
   err.status = err.status || 'error';
   err.message = err.message || 'Server Error';
 
-  if (process.env.NODE_ENV === 'development') {
+  if (
+    process.env.NODE_ENV === 'test' ||
+    process.env.NODE_ENV === 'development'
+  ) {
     sendErrorDev(err, res);
   } else if (process.env.NODE_ENV === 'production') {
     let error: TCustomError = Object.create(err);

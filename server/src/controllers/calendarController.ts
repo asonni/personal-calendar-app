@@ -31,9 +31,7 @@ export const getCalendar = async (
 
     res.status(200).json({ success: true, data: calendar });
   } catch (error) {
-    return next(
-      new ErrorResponse(`Something went wrong, please try again later`, 400)
-    );
+    return next(new ErrorResponse(`Calendar not found`, 404));
   }
 };
 
@@ -68,9 +66,7 @@ export const getCalendars = async (
 
     res.status(200).json(calendars);
   } catch (error) {
-    return next(
-      new ErrorResponse(`Something went wrong, please try again later`, 400)
-    );
+    return next(new ErrorResponse('Failed to get calendars', 400));
   }
 };
 
@@ -80,15 +76,15 @@ export const createCalendar = async (
   next: NextFunction
 ) => {
   try {
-    await db('Calendars').insert(req.body);
+    const [calendar] = await db('Calendars').insert(req.body).returning('*');
 
-    res
-      .status(201)
-      .json({ success: true, message: 'Calendar created successfully' });
+    res.status(201).json({
+      success: true,
+      message: 'Calendar created successfully',
+      data: calendar
+    });
   } catch (error) {
-    return next(
-      new ErrorResponse(`Something went wrong, please try again later`, 400)
-    );
+    return next(new ErrorResponse('Failed to create calendar', 400));
   }
 };
 
@@ -101,25 +97,25 @@ export const updateCalendar = async (
   const calendarId = req.params.calendarId;
 
   try {
-    const calendar = await db('Calendars')
+    const [calendar] = await db('Calendars')
       .update({
         ...req.body,
         updatedAt: new Date()
       })
-      .where({ calendarId, userId });
+      .where({ calendarId, userId })
+      .returning('*');
 
-    if (!calendar) {
+    if (!calendar?.calendarId) {
       return next(new ErrorResponse(`Calendar not found`, 404));
     }
 
     res.status(200).json({
       success: true,
-      message: 'Calendar updated successfully'
+      message: 'Calendar updated successfully',
+      data: calendar
     });
   } catch (error) {
-    return next(
-      new ErrorResponse(`Something went wrong, please try again later`, 400)
-    );
+    return next(new ErrorResponse('Failed to update calendar', 400));
   }
 };
 
@@ -145,8 +141,6 @@ export const deleteCalendar = async (
       data: calendarId
     });
   } catch (error) {
-    return next(
-      new ErrorResponse(`Something went wrong, please try again later`, 400)
-    );
+    return next(new ErrorResponse('Failed to delete calendar', 400));
   }
 };

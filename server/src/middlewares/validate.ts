@@ -6,10 +6,10 @@ import { TAuthenticatedRequest } from '../utils/types';
 
 const validate = (schema: any) => {
   return (req: TAuthenticatedRequest, res: Response, next: NextFunction) => {
-    if (!!req.user) {
-      req.body.userId = req.user?.userId;
+    if (!!req.user?.userId) {
+      req.body.userId = req.user.userId;
     }
-    if (req.params.calendarId) {
+    if (!!req.params.calendarId) {
       req.body.calendarId = req.params.calendarId;
     }
     const isValid = validateSchema(schema, req.body);

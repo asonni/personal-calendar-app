@@ -1,9 +1,10 @@
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Response } from 'express';
 import jwt, { JwtPayload, Secret } from 'jsonwebtoken';
 
 import knex from '../db/knex';
 import { TUserSchema } from '../schemas/userSchema';
 import ErrorResponse from '../utils/errorResponse';
+import { TAuthenticatedRequest } from '../utils/types';
 import asyncHandler from './async';
 
 type TCustomJwtPayload = JwtPayload & {
@@ -13,7 +14,7 @@ type TCustomJwtPayload = JwtPayload & {
 
 // Protect routes
 export const protect = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: TAuthenticatedRequest, res: Response, next: NextFunction) => {
     let token: string | undefined;
 
     const authorization = req.headers.authorization;
@@ -69,7 +70,7 @@ export const protect = asyncHandler(
         });
       }
 
-      (req as any).user = currentUser;
+      req.user = currentUser;
 
       return next();
     } catch (error) {

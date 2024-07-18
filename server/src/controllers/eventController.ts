@@ -31,14 +31,12 @@ export const getEvent = async (
       .first();
 
     if (!event) {
-      return next(new ErrorResponse(`Event not found`, 404));
+      return next(new ErrorResponse('Event not found', 404));
     }
 
     res.status(200).json({ success: true, data: event });
   } catch (error) {
-    return next(
-      new ErrorResponse(`Something went wrong, please try again later`, 400)
-    );
+    return next(new ErrorResponse('Event not found', 404));
   }
 };
 
@@ -79,12 +77,7 @@ export const getEvents = async (
 
     res.status(200).json(events);
   } catch (error) {
-    return next(
-      new ErrorResponse(
-        `Something went wrong, please try again later ${error}`,
-        400
-      )
-    );
+    return next(new ErrorResponse('Failed to get events', 400));
   }
 };
 
@@ -101,9 +94,7 @@ export const createEvent = async (
       .status(201)
       .json({ success: true, message: 'Event created successfully' });
   } catch (error) {
-    return next(
-      new ErrorResponse(`Something went wrong, please try again later`, 400)
-    );
+    return next(new ErrorResponse('Failed to create event', 400));
   }
 };
 
@@ -145,9 +136,7 @@ export const updateEvent = async (
     });
   } catch (error) {
     console.log({ error });
-    return next(
-      new ErrorResponse(`Something went wrong, please try again later`, 400)
-    );
+    return next(new ErrorResponse('Failed to update event', 400));
   }
 };
 
@@ -171,8 +160,6 @@ export const deleteEvent = async (
       data: eventId
     });
   } catch (error) {
-    return next(
-      new ErrorResponse(`Something went wrong, please try again later`, 400)
-    );
+    return next(new ErrorResponse('Failed to delete event', 400));
   }
 };
