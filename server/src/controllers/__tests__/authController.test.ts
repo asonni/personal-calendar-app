@@ -16,7 +16,7 @@ describe('Auth Controller', () => {
     expect(response.body).toHaveProperty('token');
   });
 
-  it('should login an existing user', async () => {
+  it('should login an existing user on register', async () => {
     await request(app).post('/api/v1/auth/register').send({
       firstName: 'log',
       lastName: 'in',
@@ -56,7 +56,7 @@ describe('Auth Controller', () => {
     expect(response.body.token).toBeNull();
   });
 
-  it('should fail to login with invalid credentials', async () => {
+  it('should fail to login with invalid credentials on register', async () => {
     await request(app).post('/api/v1/auth/register').send({
       firstName: 'wrong',
       lastName: 'pass',
@@ -72,5 +72,53 @@ describe('Auth Controller', () => {
     expect(response.status).toBe(401);
     expect(response.body.success).toBeFalsy();
     expect(response.body.message).toBe('Invalid credentials');
+  });
+
+  it('should return 400 if email is empty on login', async () => {
+    const response = await request(app).post('/api/v1/auth/login').send({
+      email: '',
+      password: 'anypassword'
+    });
+
+    expect(response.status).toBe(400);
+    expect(response.body.success).toBeFalsy();
+    expect(response.body.message).toBe('Email field is required');
+  });
+
+  it('should return 400 if email is not valid on login', async () => {
+    const response = await request(app).post('/api/v1/auth/login').send({
+      email: 'wrongemail',
+      password: 'anypassword'
+    });
+
+    expect(response.status).toBe(400);
+    expect(response.body.success).toBeFalsy();
+    expect(response.body.message).toBe('You must provide a valid email');
+  });
+
+  it('should return 400 if password is empty on login', async () => {
+    const response = await request(app).post('/api/v1/auth/login').send({
+      email: 'fake-email@mail.com',
+      password: ''
+    });
+
+    expect(response.status).toBe(400);
+    expect(response.body.success).toBeFalsy();
+    expect(response.body.message).toBe('Password field is required');
+  });
+
+  it('should return 400 if the registered email already exists', async () => {
+    await request(app).post('/api/v1/auth/register').send({
+      email: 'sameemail@mail.com',
+      password: 'password123'
+    });
+
+    const response = await request(app).post('/api/v1/auth/register').send({
+      email: 'sameemail@mail.com',
+      password: 'password321'
+    });
+
+    expect(response.status).toBe(400);
+    expect(response.body.message).toBe('Email already existing');
   });
 });

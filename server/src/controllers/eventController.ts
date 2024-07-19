@@ -12,11 +12,11 @@ export const getEvent = asyncHandler(
     const { calendarId, eventId } = req.params;
 
     if (!validator.isUUID(calendarId)) {
-      return next(new ErrorResponse(`Calendar ID is not valid`, 400));
+      return next(new ErrorResponse('Calendar ID is not valid', 400));
     }
 
     if (!validator.isUUID(eventId)) {
-      return next(new ErrorResponse(`Event ID is not valid`, 400));
+      return next(new ErrorResponse('Event ID is not valid', 400));
     }
 
     const event = await db('Events')
@@ -87,10 +87,14 @@ export const createEvent = asyncHandler(
     const { userId, ...rest } = req.body;
 
     if (!validator.isUUID(rest.calendarId)) {
-      return next(new ErrorResponse(`Calendar ID is not valid`, 400));
+      return next(new ErrorResponse('Calendar ID is not valid', 400));
     }
 
     const [event] = await db('Events').insert(rest).returning('*');
+
+    if (!event) {
+      return next(new ErrorResponse('Failed to create event', 400));
+    }
 
     res.status(201).json({
       success: true,
@@ -106,23 +110,32 @@ export const updateEvent = asyncHandler(
     const { calendarId, eventId } = req.params;
 
     if (!validator.isUUID(calendarId)) {
-      return next(new ErrorResponse(`Calendar ID is not valid`, 400));
+      return next(new ErrorResponse('Calendar ID is not valid', 400));
     }
 
     if (!validator.isUUID(eventId)) {
-      return next(new ErrorResponse(`Event ID is not valid`, 400));
+      return next(new ErrorResponse('Event ID is not valid', 400));
     }
 
-    const calendar = await db('Calendars')
+    const foundedCalendar = await db('Calendars')
       .where({ userId, calendarId })
       .select('*')
       .first();
 
-    if (!calendar) {
-      return next(new ErrorResponse(`Event not found`, 404));
+    if (!foundedCalendar) {
+      return next(new ErrorResponse('Calendar not found', 404));
     }
 
-    const event = await db('Events')
+    const foundedEvent = await db('Events')
+      .where({ calendarId, eventId })
+      .select('*')
+      .first();
+
+    if (!foundedEvent) {
+      return next(new ErrorResponse('Event not found', 404));
+    }
+
+    const [event] = await db('Events')
       .update({
         ...rest,
         updatedAt: new Date()
@@ -130,15 +143,17 @@ export const updateEvent = asyncHandler(
       .where({
         calendarId,
         eventId
-      });
+      })
+      .returning('*');
 
     if (!event) {
-      return next(new ErrorResponse(`Event not found`, 404));
+      return next(new ErrorResponse('Failed to update event', 400));
     }
 
     res.status(200).json({
       success: true,
-      message: 'Event updated successfully'
+      message: 'Event updated successfully',
+      data: event
     });
   }
 );
@@ -148,17 +163,26 @@ export const deleteEvent = asyncHandler(
     const { calendarId, eventId } = req.params;
 
     if (!validator.isUUID(calendarId)) {
-      return next(new ErrorResponse(`Calendar ID is not valid`, 400));
+      return next(new ErrorResponse('Calendar ID is not valid', 400));
     }
 
     if (!validator.isUUID(eventId)) {
-      return next(new ErrorResponse(`Event ID is not valid`, 400));
+      return next(new ErrorResponse('Event ID is not valid', 400));
+    }
+
+    const foundedEvent = await db('Events')
+      .where({ calendarId, eventId })
+      .select('*')
+      .first();
+
+    if (!foundedEvent) {
+      return next(new ErrorResponse('Event not found', 404));
     }
 
     const event = await db('Events').where({ calendarId, eventId }).del();
 
     if (!event) {
-      return next(new ErrorResponse(`Event not found`, 404));
+      return next(new ErrorResponse('Failed to delete event', 400));
     }
 
     res.status(200).json({

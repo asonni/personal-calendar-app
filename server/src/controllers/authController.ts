@@ -74,6 +74,14 @@ export const register = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const newUser = req.body;
 
+    const [foundedUserByEmail] = await db('Users')
+      .where({ email: newUser.email })
+      .returning(['email']);
+
+    if (foundedUserByEmail) {
+      return next(new ErrorResponse('Email already existing', 400));
+    }
+
     const hashedPassword = await bcrypt.hash(newUser.password, 10);
 
     const [user]: TUserSchema[] = await db('Users')
@@ -132,9 +140,7 @@ export const forgotPassword = asyncHandler(
     const user = await db('Users').where({ email }).first();
 
     if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: 'User not found' });
+      return next(new ErrorResponse('User not found', 404));
     }
 
     const resetToken = crypto.randomBytes(20).toString('hex');
@@ -210,7 +216,7 @@ export const resetPassword = asyncHandler(
 
     const hashedPassword = await bcrypt.hash(req.body.newPassword, 10);
 
-    await db('Users')
+    const updatedUser = await db('Users')
       .update({
         password: hashedPassword,
         resetPasswordToken: null,
@@ -219,6 +225,10 @@ export const resetPassword = asyncHandler(
         updatedAt: new Date()
       })
       .where({ userId: user.userId });
+
+    if (!updatedUser) {
+      return next(new ErrorResponse('Unable to reset your password', 400));
+    }
 
     return sendTokenResponse(user, 200, req, res);
   }

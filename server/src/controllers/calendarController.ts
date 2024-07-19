@@ -12,7 +12,7 @@ export const getCalendar = asyncHandler(
     const { calendarId } = req.params;
 
     if (!validator.isUUID(calendarId)) {
-      return next(new ErrorResponse(`Calendar not found`, 404));
+      return next(new ErrorResponse('Calendar ID is not valid', 400));
     }
 
     const calendar = await db('Calendars')
@@ -30,7 +30,7 @@ export const getCalendar = asyncHandler(
       .first();
 
     if (!calendar) {
-      return next(new ErrorResponse(`Calendar not found`, 404));
+      return next(new ErrorResponse('Calendar not found', 404));
     }
 
     res.status(200).json({ success: true, data: calendar });
@@ -70,6 +70,10 @@ export const createCalendar = asyncHandler(
   async (req: TAuthenticatedRequest, res: Response, next: NextFunction) => {
     const [calendar] = await db('Calendars').insert(req.body).returning('*');
 
+    if (!calendar) {
+      return next(new ErrorResponse('Failed to create calendar', 400));
+    }
+
     res.status(201).json({
       success: true,
       message: 'Calendar created successfully',
@@ -84,7 +88,16 @@ export const updateCalendar = asyncHandler(
     const { calendarId } = req.params;
 
     if (!validator.isUUID(calendarId)) {
-      return next(new ErrorResponse(`Calendar ID is not valid`, 400));
+      return next(new ErrorResponse('Calendar ID is not valid', 400));
+    }
+
+    const foundedCalendar = await db('Calendars')
+      .where({ userId, calendarId })
+      .select('*')
+      .first();
+
+    if (!foundedCalendar) {
+      return next(new ErrorResponse('Calendar not found', 404));
     }
 
     const [calendar] = await db('Calendars')
@@ -95,8 +108,8 @@ export const updateCalendar = asyncHandler(
       .where({ calendarId, userId })
       .returning('*');
 
-    if (!calendar?.calendarId) {
-      return next(new ErrorResponse(`Calendar not found`, 404));
+    if (!calendar) {
+      return next(new ErrorResponse('Failed to update calendar', 400));
     }
 
     res.status(200).json({
@@ -109,10 +122,20 @@ export const updateCalendar = asyncHandler(
 
 export const deleteCalendar = asyncHandler(
   async (req: TAuthenticatedRequest, res: Response, next: NextFunction) => {
+    const userId = req.user?.userId;
     const { calendarId } = req.params;
 
     if (!validator.isUUID(calendarId)) {
-      return next(new ErrorResponse(`Calendar not found`, 404));
+      return next(new ErrorResponse('Calendar ID is not valid', 400));
+    }
+
+    const foundedCalendar = await db('Calendars')
+      .where({ userId, calendarId })
+      .select('*')
+      .first();
+
+    if (!foundedCalendar) {
+      return next(new ErrorResponse('Calendar not found', 404));
     }
 
     const calendar = await db('Calendars')
@@ -120,7 +143,7 @@ export const deleteCalendar = asyncHandler(
       .del();
 
     if (!calendar) {
-      return next(new ErrorResponse(`Calendar not found`, 404));
+      return next(new ErrorResponse('Failed to delete calendar', 400));
     }
 
     res.status(200).json({

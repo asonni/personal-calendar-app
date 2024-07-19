@@ -5,6 +5,7 @@ import app from '../../app';
 
 describe('Calendar Controller', () => {
   let token: string;
+  let deletedCalenderId: string;
 
   beforeEach(async () => {
     await testDb.migrate.rollback();
@@ -13,7 +14,7 @@ describe('Calendar Controller', () => {
     token = await global.register();
   });
 
-  it('should get a list of calenders', async () => {
+  it('should get list of calenders', async () => {
     await request(app)
       .post('/api/v1/calendars')
       .set('Authorization', `Bearer ${token}`)
@@ -43,7 +44,7 @@ describe('Calendar Controller', () => {
     expect(response.body.data[1]).toHaveProperty('name', 'Calender name 2');
   });
 
-  it('should get a calender by id', async () => {
+  it('should get single calender by ID', async () => {
     let response = await request(app)
       .post('/api/v1/calendars')
       .set('Authorization', `Bearer ${token}`)
@@ -83,7 +84,7 @@ describe('Calendar Controller', () => {
     expect(response.body.data).toHaveProperty('name', 'New calender name');
   });
 
-  it('should update calender by id', async () => {
+  it('should update calender by ID', async () => {
     let response = await request(app)
       .post('/api/v1/calendars')
       .set('Authorization', `Bearer ${token}`)
@@ -112,12 +113,43 @@ describe('Calendar Controller', () => {
     expect(response.body.data).toHaveProperty('color', '#1100EE');
   });
 
-  it('should return 404 if calender not found', async () => {
+  it('should delete calender by ID', async () => {
+    let response = await request(app)
+      .post('/api/v1/calendars')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        name: 'deleted calender name',
+        description: 'deleted calendar description',
+        color: '#1100FF'
+      });
+
+    deletedCalenderId = response.body.data.calendarId;
+
+    response = await request(app)
+      .delete(`/api/v1/calendars/${deletedCalenderId}`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBeTruthy();
+    expect(response.body.data).toBe(deletedCalenderId);
+    expect(response.body.message).toBe('Calendar deleted successfully');
+  });
+
+  it('should return 404 if the calenderId is not found', async () => {
     const response = await request(app)
-      .get(`/api/v1/calendars/face-calendar-id`) // Non-existent calendar ID
+      .get(`/api/v1/calendars/${deletedCalenderId}`)
       .set('Authorization', `Bearer ${token}`);
 
     expect(response.status).toBe(404);
     expect(response.body).toHaveProperty('message', 'Calendar not found');
+  });
+
+  it('should return 400 if the calendarId is not valid', async () => {
+    const response = await request(app)
+      .get(`/api/v1/calendars/fake-calendar-id`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty('message', 'Calendar ID is not valid');
   });
 });
