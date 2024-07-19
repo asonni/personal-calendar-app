@@ -9,7 +9,7 @@
     "db:migrate": "knex migrate:latest",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
-    "cluster": "pm2 start dist/src/server.js -i max",
+    "cluster": "pm2 start ecosystem.config.js --env production",
     "db:export": "rm -rf ./seeds && mkdir seeds && ts-node exportDatabase.ts",
     "test": "jest --detectOpenHandles --forceExit",
     "test:watch": "jest --watch --detectOpenHandles",
