@@ -1,0 +1,63 @@
+<div class="h-screen flex flex-col bg-[url(/bg.jpg)] bg-cover bg-top">
+  <div class="z-[4] flex h-full w-full flex-col items-center justify-center">
+    <div class="h-full w-full md:h-auto md:w-[420px]">
+      <div
+        class="rounded-lg border bg-card text-card-foreground shadow-sm h-full w-full p-8"
+      >
+        <div class="flex flex-col space-y-1.5 p-6 px-0 pt-0">
+          <h3 class="text-2xl font-semibold leading-none tracking-tight">
+            Create an account
+          </h3>
+          <p class="text-sm text-muted-foreground">
+            Use your email to continue
+          </p>
+        </div>
+        <div class="p-6 pt-0 space-y-5 px-0 pb-0">
+          <form
+            [formGroup]="signUpForm"
+            (ngSubmit)="onSubmit()"
+            class="space-y-4"
+          >
+            <tui-input formControlName="firstName">
+              First name
+              <input inputmode="firstName" tuiTextfield required />
+            </tui-input>
+            <tui-input formControlName="lastName">
+              Last name
+              <input inputmode="lastName" tuiTextfield required />
+            </tui-input>
+            <tui-input formControlName="email">
+              Email
+              <input inputmode="email" tuiTextfield required />
+            </tui-input>
+            <tui-input-password formControlName="password">
+              Password
+              <input inputmode="email" tuiTextfield required />
+            </tui-input-password>
+            <button
+              tuiButton
+              type="submit"
+              class="w-full"
+              [disabled]="signUpForm.invalid"
+            >
+              Continue
+            </button>
+          </form>
+          <div
+            data-orientation="horizontal"
+            role="none"
+            class="shrink-0 bg-border h-[1px] w-full"
+          ></div>
+          <p class="text-xs text-muted-foreground">
+            Don't have an account?<a routerLink="/sign-in">
+              <span class="ml-1 text-sky-700 hover:underline">Sign in</span>
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="fixed inset-0 z-[1] bg-[linear-gradient(180deg,rgba(0,0,0,0.8),rgba(0,0,0,0.4),rgba(0,0,0,0.8))]"
+  ></div>
+</div>
