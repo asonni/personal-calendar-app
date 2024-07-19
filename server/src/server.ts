@@ -5,7 +5,7 @@ import app from './app';
 
 config({ path: '.env.local' });
 
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 8080;
 
 const server = http.createServer(app);
 
