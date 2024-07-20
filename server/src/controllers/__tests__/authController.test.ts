@@ -44,7 +44,7 @@ describe('Auth Controller', () => {
 
     expect(response.status).toBe(200);
     expect(response.body.success).toBeTruthy();
-    expect(response.body.data).toHaveProperty('email', 'john.doe@example.com');
+    expect(response.body.token).toBe(token);
   });
 
   it('should logout an existing user', async () => {
