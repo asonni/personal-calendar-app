@@ -1,13 +1,20 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { TuiButtonModule } from '@taiga-ui/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  Inject,
+  OnInit
+} from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { TuiButtonModule, TuiAlertService } from '@taiga-ui/core';
 import { TuiInputModule, TuiInputPasswordModule } from '@taiga-ui/kit';
 import {
   FormBuilder,
   FormGroup,
   Validators,
-  ReactiveFormsModule,
+  ReactiveFormsModule
 } from '@angular/forms';
+
+import { AuthService } from '../auth/auth.service';
 
 @Component({
   selector: 'app-sign-up',
@@ -17,35 +24,48 @@ import {
     TuiInputPasswordModule,
     ReactiveFormsModule,
     TuiButtonModule,
-    RouterLink,
+    RouterLink
   ],
   templateUrl: './sign-up.component.html',
   styleUrl: './sign-up.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SignUpComponent {
+export class SignUpComponent implements OnInit {
   signUpForm: FormGroup;
+  isLoading: boolean = false;
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private router: Router,
+    private fb: FormBuilder,
+    private authService: AuthService,
+    @Inject(TuiAlertService) private readonly alerts: TuiAlertService
+  ) {
     this.signUpForm = this.fb.group({
       firstName: ['', [Validators.required]],
       lastName: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
 
   ngOnInit(): void {}
 
-  onSubmit(): void {
-    if (this.signUpForm.valid) {
-      const { email, password } = this.signUpForm.value;
-      console.log(
-        'Login successful with email:',
-        email,
-        'and password:',
-        password
-      );
-      // Handle login logic here
+  async onSubmit(): Promise<any> {
+    try {
+      if (this.signUpForm.valid) {
+        this.isLoading = true;
+        const { firstName, lastName, email, password } = this.signUpForm.value;
+        await this.authService.signUp(firstName, lastName, email, password);
+        if (this.authService.isAuthenticated()) {
+          this.router.navigate(['/calendar']);
+        }
+      }
+    } catch (error: any) {
+      this.alerts
+        .open('', { label: error?.message, status: 'error' })
+        .subscribe();
+    } finally {
+      this.isLoading = false;
     }
   }
 }

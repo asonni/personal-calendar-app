@@ -8,7 +8,7 @@ import { TAuthenticatedRequest } from '../utils/types';
 import asyncHandler from './async';
 
 type TCustomJwtPayload = JwtPayload & {
-  userId: number;
+  id: number;
   iat: number;
 };
 
@@ -27,8 +27,11 @@ export const protect = asyncHandler(
       token = req.cookies.token;
     }
 
+    console.log(token);
+
     // Make sure token exists
     if (!token) {
+      console.log('here');
       return next(new ErrorResponse(`Unauthorized`, 401));
     }
 

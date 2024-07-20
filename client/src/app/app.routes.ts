@@ -1,16 +1,37 @@
 import { Routes } from '@angular/router';
-import { BigCalendarComponent } from './big-calendar/big-calendar.component';
+
+import { AuthGuard } from './auth/auth.guard';
 import { SignInComponent } from './sign-in/sign-in.component';
 import { SignUpComponent } from './sign-up/sign-up.component';
-import { AuthGuard } from './auth/auth.guard';
+import { BigCalendarComponent } from './big-calendar/big-calendar.component';
+import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './reset-password/reset-password.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/sign-in', pathMatch: 'full' },
-  { path: 'sign-in', component: SignInComponent },
-  { path: 'sign-up', component: SignUpComponent },
+  {
+    path: '',
+    redirectTo: '/sign-in',
+    pathMatch: 'full'
+  },
+  {
+    path: 'sign-in',
+    component: SignInComponent
+  },
+  {
+    path: 'sign-up',
+    component: SignUpComponent
+  },
+  {
+    path: 'forgot-password',
+    component: ForgotPasswordComponent
+  },
+  {
+    path: 'reset-password/:resettoken',
+    component: ResetPasswordComponent
+  },
   {
     path: 'calendar',
     component: BigCalendarComponent,
-    canActivate: [AuthGuard],
-  },
+    canActivate: [AuthGuard]
+  }
 ];

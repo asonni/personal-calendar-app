@@ -18,13 +18,11 @@ process.on('uncaughtException', (err: Error) => {
   process.exit(1);
 });
 
-const PORT = process.env.PORT || 8080;
-
 const app: Express = express();
 
 type TOrigin = boolean | string | RegExp | Array<boolean | string | RegExp>;
 
-const whitelist: string[] = [`http://localhost:${PORT}`];
+const whitelist: string[] = [`http://localhost:4200`];
 
 const corsOptions: CorsOptions = {
   origin: (
@@ -36,7 +34,10 @@ const corsOptions: CorsOptions = {
     } else {
       callback(new Error('Not allowed by CORS'));
     }
-  }
+  },
+  methods: 'GET,POST,PUT,DELETE',
+  credentials: true, // Allow credentials
+  optionsSuccessStatus: 204
 };
 
 colors.enable();

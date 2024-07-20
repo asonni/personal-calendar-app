@@ -17,7 +17,7 @@ import {
 import { AuthService } from '../auth/auth.service';
 
 @Component({
-  selector: 'app-sign-in',
+  selector: 'app-forgot-password',
   standalone: true,
   imports: [
     TuiInputModule,
@@ -26,12 +26,12 @@ import { AuthService } from '../auth/auth.service';
     TuiButtonModule,
     RouterLink
   ],
-  templateUrl: './sign-in.component.html',
-  styleUrl: './sign-in.component.css',
+  templateUrl: './forgot-password.component.html',
+  styleUrl: './forgot-password.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SignInComponent implements OnInit {
-  signInForm: FormGroup;
+export class ForgotPasswordComponent implements OnInit {
+  forgotPasswordForm: FormGroup;
   isLoading: boolean = false;
 
   constructor(
@@ -40,9 +40,8 @@ export class SignInComponent implements OnInit {
     private authService: AuthService,
     @Inject(TuiAlertService) private readonly alerts: TuiAlertService
   ) {
-    this.signInForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required]]
+    this.forgotPasswordForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]]
     });
   }
 
@@ -50,12 +49,15 @@ export class SignInComponent implements OnInit {
 
   async onSubmit(): Promise<any> {
     try {
-      if (this.signInForm.valid) {
+      if (this.forgotPasswordForm.valid) {
         this.isLoading = true;
-        const { email, password } = this.signInForm.value;
-        await this.authService.signIn(email, password);
-        if (this.authService.isAuthenticated()) {
-          this.router.navigate(['/calendar']);
+        const { email } = this.forgotPasswordForm.value;
+        const response = await this.authService.forgotPassword(email);
+        if (response.data.success) {
+          this.alerts
+            .open('', { label: response.data.message, status: 'success' })
+            .subscribe();
+          this.router.navigate(['/sign-in']);
         }
       }
     } catch (error: any) {

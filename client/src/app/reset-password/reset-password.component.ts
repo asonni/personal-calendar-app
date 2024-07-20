@@ -1,8 +1,8 @@
 import {
-  ChangeDetectionStrategy,
   Component,
+  Input,
   Inject,
-  OnInit
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { TuiInputModule, TuiInputPasswordModule } from '@taiga-ui/kit';
 import { TuiButtonModule, TuiAlertService } from '@taiga-ui/core';
@@ -17,7 +17,7 @@ import {
 import { AuthService } from '../auth/auth.service';
 
 @Component({
-  selector: 'app-sign-in',
+  selector: 'app-reset-password',
   standalone: true,
   imports: [
     TuiInputModule,
@@ -26,13 +26,13 @@ import { AuthService } from '../auth/auth.service';
     TuiButtonModule,
     RouterLink
   ],
-  templateUrl: './sign-in.component.html',
-  styleUrl: './sign-in.component.css',
+  templateUrl: './reset-password.component.html',
+  styleUrl: './reset-password.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SignInComponent implements OnInit {
-  signInForm: FormGroup;
+export class ResetPasswordComponent {
   isLoading: boolean = false;
+  resetPasswordForm: FormGroup;
 
   constructor(
     private router: Router,
@@ -40,22 +40,27 @@ export class SignInComponent implements OnInit {
     private authService: AuthService,
     @Inject(TuiAlertService) private readonly alerts: TuiAlertService
   ) {
-    this.signInForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required]]
+    this.resetPasswordForm = this.fb.group({
+      newPassword: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
 
-  ngOnInit(): void {}
+  @Input() resettoken!: string;
 
   async onSubmit(): Promise<any> {
     try {
-      if (this.signInForm.valid) {
+      if (this.resetPasswordForm.valid) {
         this.isLoading = true;
-        const { email, password } = this.signInForm.value;
-        await this.authService.signIn(email, password);
-        if (this.authService.isAuthenticated()) {
-          this.router.navigate(['/calendar']);
+        const { newPassword } = this.resetPasswordForm.value;
+        const response = await this.authService.resetPassword(
+          this.resettoken,
+          newPassword
+        );
+        if (response.data.success) {
+          this.alerts
+            .open('', { label: response.data.message, status: 'success' })
+            .subscribe();
+          this.router.navigate(['/sign-in']);
         }
       }
     } catch (error: any) {

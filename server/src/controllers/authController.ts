@@ -22,7 +22,8 @@ const sendTokenResponse = (
   user: TUserSchema,
   statusCode: number,
   req: Request,
-  res: Response
+  res: Response,
+  message?: string
 ) => {
   const token = jwt.sign(
     {
@@ -40,10 +41,15 @@ const sendTokenResponse = (
     secure: req.secure || req.headers['x-forwarded-proto'] === 'https'
   };
 
-  return res.status(statusCode).cookie('token', token, options).json({
-    success: true,
-    token
-  });
+  return res
+    .status(statusCode)
+    .cookie('token', token, options)
+    .json({
+      success: true,
+      message: message || null,
+      expiresIn: options.expires,
+      token
+    });
 };
 
 export const logout = asyncHandler(
@@ -61,12 +67,9 @@ export const getMe = asyncHandler(
   async (req: TAuthenticatedRequest, res: Response, next: NextFunction) => {
     const [user]: TUserSchema[] = await db('Users')
       .where({ userId: req.user?.userId })
-      .select(['firstName', 'lastName', 'email']);
+      .select(['userId', 'firstName', 'lastName', 'email']);
 
-    return res.status(200).json({
-      success: true,
-      data: user
-    });
+    sendTokenResponse(user, 200, req, res);
   }
 );
 
@@ -116,9 +119,7 @@ export const login = asyncHandler(
     const user = await db('Users').where({ email }).first();
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res
-        .status(401)
-        .json({ success: false, message: 'Invalid credentials' });
+      return next(new ErrorResponse('Invalid credentials', 401));
     }
 
     sendTokenResponse(user, 200, req, res);
@@ -157,16 +158,37 @@ export const forgotPassword = asyncHandler(
       })
       .where({ userId: user.userId });
 
-    const resetUrl = `${req.protocol}://${req.get(
-      'host'
-    )}/api/v1/auth/resetpassword/${resetToken}`;
+    let resetUrl = `${req.protocol}://localhost:4200/reset-password/${resetToken}`;
 
-    const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a PUT request to: \n\n ${resetUrl}`;
+    if (process.env.NODE_ENV === 'production') {
+      resetUrl = `${req.protocol}://${req.get(
+        'host'
+      )}/reset-password/${resetToken}`;
+    }
+
+    const message = `
+    <!DOCTYPE html>
+    <html ang="en">
+      <head>
+        <meta charset="UTF-8">
+        <title>Personal Calendar App | Password reset email</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://cdn.tailwindcss.com"></script>
+      </head>
+      <body>
+        <h3 class="text-lg font-bold">
+          You are receiving this email because you (or someone else) has requested the reset of a password.
+        </h3>
+        <p class="text-sm text-muted-foreground">
+          Please to rest your password <a target="_blank" href="${resetUrl}">click here</a>
+        </p>
+      </body>
+    </html>`;
 
     try {
       await sendEmail({
         email: user.email,
-        subject: 'Password Reset',
+        subject: 'Personal Calendar App <Password Reset>',
         message
       });
 
@@ -192,11 +214,12 @@ export const resetPassword = asyncHandler(
     const { newPassword } = req.body;
     const { resettoken } = req.params;
 
-    if (!newPassword || !validator.isEmpty(newPassword)) {
+    if (!newPassword || validator.isEmpty(newPassword)) {
+      console.log('here');
       return next(new ErrorResponse('New password field is required', 400));
     }
 
-    if (!resettoken || !validator.isEmpty(resettoken)) {
+    if (!resettoken || validator.isEmpty(resettoken)) {
       return next(new ErrorResponse('Reset token was not provided', 400));
     }
 
@@ -230,6 +253,9 @@ export const resetPassword = asyncHandler(
       return next(new ErrorResponse('Unable to reset your password', 400));
     }
 
-    return sendTokenResponse(user, 200, req, res);
+    const message =
+      'You have successfully reset your password, please sign in again.';
+
+    return sendTokenResponse(user, 200, req, res, message);
   }
 );

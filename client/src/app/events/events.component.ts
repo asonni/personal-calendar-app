@@ -7,6 +7,4 @@ import { Component } from '@angular/core';
   templateUrl: './events.component.html',
   styleUrl: './events.component.css'
 })
-export class EventsComponent {
-
-}
+export class EventsComponent {}
