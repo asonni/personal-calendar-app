@@ -27,7 +27,9 @@
             "prefix": "app",
             "style": "kebab-case"
           }
-        ]
+        ],
+        "@angular-eslint/no-empty-lifecycle-method": "off",
+        "@typescript-eslint/no-explicit-any": "off"
       }
     },
     {
