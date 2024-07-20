@@ -18,11 +18,13 @@ process.on('uncaughtException', (err: Error) => {
   process.exit(1);
 });
 
+const PORT = process.env.PORT || 8080;
+
 const app: Express = express();
 
 type TOrigin = boolean | string | RegExp | Array<boolean | string | RegExp>;
 
-const whitelist: string[] = ['http://localhost:8080'];
+const whitelist: string[] = [`http://localhost:${PORT}`];
 
 const corsOptions: CorsOptions = {
   origin: (
@@ -47,19 +49,33 @@ if (process.env.NODE_ENV === 'development') {
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, '..', 'public')));
 
 app.use('/api/v1', api);
 
 app.use(errorHandler);
 
-app.all('*', (req: Request, res: Response, next: NextFunction) => {
-  next(new ErrorResponse(`Can't find ${req.originalUrl} on this server!`, 404));
-});
+if (process.env.NODE_ENV === 'development') {
+  app.all('*', (req: Request, res: Response, next: NextFunction) => {
+    next(
+      new ErrorResponse(`Can't find ${req.originalUrl} on this server!`, 404)
+    );
+  });
+}
 
-// app.get('/*', (req: Request, res: Response) => {
-//   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
-// });
+if (process.env.NODE_ENV === 'production') {
+  // Express will serve up production assets
+  // like our main.js file, or main.css file!
+  app.use(
+    express.static(path.join(__dirname, '..', '..', 'public', 'browser'))
+  );
+  // Express will serve up the index.html file
+  // if it doesn't recognize the route
+  app.get('/*', (req: Request, res: Response) => {
+    res.sendFile(
+      path.join(__dirname, '..', '..', 'public', 'browser', 'index.html')
+    );
+  });
+}
 
 app.use(errorHandler);
 
