@@ -6,6 +6,7 @@ import {
   importProvidersFrom
 } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 import { routes } from './app.routes';
 
@@ -14,6 +15,11 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withComponentInputBinding()),
-    importProvidersFrom(TuiRootModule, TuiDialogModule, TuiAlertModule)
+    importProvidersFrom(
+      TuiRootModule,
+      TuiDialogModule,
+      TuiAlertModule,
+      CommonModule
+    )
   ]
 };
