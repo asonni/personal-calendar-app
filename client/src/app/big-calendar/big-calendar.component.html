@@ -3,9 +3,24 @@
     <header
       class="flex items-center justify-between border-b border-gray-200 pb-6 lg:flex-none"
     >
-      <h1 class="text-base font-semibold leading-6 text-gray-900">
-        <time datetime="2022-01">{{ currentDay }}</time>
-      </h1>
+      <div class="flex items-center justify-between gap-x-4">
+        <tui-select
+          itemContent
+          class="w-[300px]"
+          [(ngModel)]="selectedCalendar"
+          (ngModelChange)="onChangeSelectedCalendar($event)"
+        >
+          My Calendars
+          <input placeholder="Choose your calendar" tuiTextfield />
+          <tui-data-list-wrapper
+            *tuiDataList
+            [items]="calendars"
+          ></tui-data-list-wrapper>
+        </tui-select>
+        <h1 class="text-base font-semibold leading-6 text-gray-900">
+          {{ currentDay }}
+        </h1>
+      </div>
       <div class="flex items-center">
         <div
           class="relative flex items-center rounded-md bg-white shadow-sm md:items-stretch"
@@ -107,6 +122,49 @@
                 <ng-template #elseBlock>
                   {{ day.format('DD') }}
                 </ng-template>
+                <ol class="mt-2">
+                  <ng-container *ngFor="let event of events">
+                    <li
+                      [ngClass]="{
+                        'group flex justify-between border rounded-md px-2 border-sky-500': true,
+                        'bg-sky-500 text-white': event.allDay
+                      }"
+                      *ngIf="
+                        isTimeWithinSpecificDay(
+                          event.startDate,
+                          event.endDate,
+                          day.format('YYYY-MM-DD')
+                        )
+                      "
+                    >
+                      <div class="flex justify-center items-center">
+                        <p
+                          *ngIf="!event.allDay"
+                          class="size-2 rounded-full bg-sky-600 mr-2"
+                        ></p>
+                        <p
+                          [ngClass]="{
+                            'flex-auto truncate font-medium': true,
+                            'text-gray-900 group-hover:text-indigo-600':
+                              !event.allDay,
+                            'text-white group-hover:text-sky-200': event.allDay
+                          }"
+                        >
+                          {{ event.title }}
+                        </p>
+                      </div>
+                      <p
+                        class="ml-3 hidden flex-none text-gray-500 group-hover:text-indigo-600 xl:block"
+                      >
+                        <span *ngIf="!event.allDay">
+                          {{ event.startTime | date: 'hh:mm a' }}
+                          -
+                          {{ event.endTime | date: 'hh:mm a' }}
+                        </span>
+                      </p>
+                    </li>
+                  </ng-container>
+                </ol>
               </div>
             </ng-container>
           </ng-container>
