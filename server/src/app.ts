@@ -22,7 +22,7 @@ const app: Express = express();
 
 type TOrigin = boolean | string | RegExp | Array<boolean | string | RegExp>;
 
-const whitelist: string[] = [`http://localhost:4200`];
+const whitelist: string[] = ['http://localhost:4200', 'http://localhost:8080'];
 
 const corsOptions: CorsOptions = {
   origin: (

@@ -29,7 +29,6 @@ export const protect = asyncHandler(
 
     // Make sure token exists
     if (!token) {
-      console.log('here');
       return next(new ErrorResponse(`Unauthorized`, 401));
     }
 
