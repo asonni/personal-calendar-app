@@ -1,6 +1,3 @@
 import { InjectionToken } from '@angular/core';
-import { TuiDialogContext } from '@taiga-ui/core';
 
-export const DIALOG_CONTEXT = new InjectionToken<TuiDialogContext<void>>(
-  'DialogContext'
-);
+export const DIALOG_DATA = new InjectionToken<any>('DIALOG_DATA');

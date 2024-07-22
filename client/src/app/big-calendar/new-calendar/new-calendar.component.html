@@ -1,0 +1,27 @@
+<form
+  class="p-4 space-y-4"
+  (ngSubmit)="onSubmit()"
+  [formGroup]="newCalendarForm"
+>
+  <tui-input required formControlName="name" tuiTextfield> Name </tui-input>
+  <tui-textarea required formControlName="description">
+    Description
+  </tui-textarea>
+  <tui-input-color
+    required
+    tuiTextfield
+    formControlName="color"
+    [colors]="palette"
+  >
+    Color
+  </tui-input-color>
+  <button
+    tuiButton
+    type="submit"
+    class="w-full"
+    [showLoader]="isLoading"
+    [disabled]="newCalendarForm.invalid || isLoading"
+  >
+    Save
+  </button>
+</form>

@@ -22,7 +22,7 @@ export class EventService {
   async onFetchEvents(calendarId: string): Promise<any> {
     try {
       const response = await this.apiService.axiosClient.get(
-        `/calendars/${calendarId}/events`
+        `/calendars/${calendarId}/events?page=1&pageSize=1000`
       );
       this.events = response.data.data;
     } catch (error) {
@@ -41,7 +41,7 @@ export class EventService {
   }: TPayloadEvent): Promise<any> {
     try {
       await this.apiService.axiosClient.post(
-        `/calendars/373beac6-026b-4879-b6aa-462867af56ba/events`,
+        `/calendars/${calendarId}/events`,
         {
           title,
           description,

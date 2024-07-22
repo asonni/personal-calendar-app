@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import { Injectable } from '@angular/core';
+import { TuiDay, TuiTime } from '@taiga-ui/cdk';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
 @Injectable({
@@ -35,5 +36,23 @@ export class UtilsService {
       }
       return null;
     };
+  }
+
+  transformDate(date: TuiDay): string {
+    const year = date.year;
+    const month = (date.month + 1).toString().padStart(2, '0');
+    const day = date.day.toString().padStart(2, '0');
+    return `${year}-${month}-${day} 00:00:00+00`;
+  }
+
+  transformDateTime(dateTime: [TuiDay, TuiTime]): string {
+    const [day, time] = dateTime;
+    const year = day.year;
+    const month = (day.month + 1).toString().padStart(2, '0');
+    const date = day.day.toString().padStart(2, '0');
+    const hours = time.hours.toString().padStart(2, '0');
+    const minutes = time.minutes.toString().padStart(2, '0');
+    const seconds = time.seconds.toString().padStart(2, '0');
+    return `${year}-${month}-${date} ${hours}:${minutes}:${seconds}+00`;
   }
 }

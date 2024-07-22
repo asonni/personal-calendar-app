@@ -1,4 +1,6 @@
 import dayjs from 'dayjs';
+import { TuiDay } from '@taiga-ui/cdk';
+import { Router } from '@angular/router';
 import { CommonModule, DatePipe } from '@angular/common';
 import {
   OnInit,
@@ -9,27 +11,34 @@ import {
 } from '@angular/core';
 import { PolymorpheusComponent } from '@tinkoff/ng-polymorpheus';
 import {
+  TuiSelectModule,
+  TuiAccordionModule,
   TuiDataListWrapperModule,
   tuiItemsHandlersProvider,
-  TuiSelectModule
+  TuiRadioLabeledModule
 } from '@taiga-ui/kit';
-
-import { AuthService } from '../auth/auth.service';
-import { Router } from '@angular/router';
-import { UtilsService } from '../utils/utils.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
   TuiAlertService,
+  TuiButtonModule,
+  TuiCalendarModule,
   TuiDataListModule,
   TuiDialogService
 } from '@taiga-ui/core';
-import { CalendarService } from '../services/calendar.service';
+
+import { DIALOG_DATA } from '../dialog-tokens';
+import { AuthService } from '../auth/auth.service';
+import { UtilsService } from '../utils/utils.service';
 import { EventService } from '../services/event.service';
+import { CalendarService } from '../services/calendar.service';
 import { NewEventComponent } from '../events/new-event/new-event.component';
+import { NewCalendarComponent } from './new-calendar/new-calendar.component';
 
 type TCalendar = {
   calendarId: string;
   name: string;
+  description: string;
+  color: string;
 };
 
 type TEvent = {
@@ -50,11 +59,15 @@ type TEvent = {
   selector: 'app-big-calendar',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
-    ReactiveFormsModule,
+    CommonModule,
     TuiSelectModule,
+    TuiButtonModule,
     TuiDataListModule,
+    TuiCalendarModule,
+    TuiAccordionModule,
+    ReactiveFormsModule,
+    TuiRadioLabeledModule,
     TuiDataListWrapperModule
   ],
   templateUrl: './big-calendar.component.html',
@@ -71,6 +84,7 @@ export class BigCalendarComponent implements OnInit {
   currentDay: any;
   currentMonth: any;
   monthIndex = dayjs().month();
+  miniCalendarValue: TuiDay | null = null;
 
   selectedCalendar: TCalendar | null = null;
 
@@ -101,13 +115,42 @@ export class BigCalendarComponent implements OnInit {
     }
   }
 
-  showNewEventDialog(): void {
+  onClickMiniCalender(day: TuiDay): void {
+    this.miniCalendarValue = day;
+    this.monthIndex = day.month;
+    this.handleCurrentMonth();
+  }
+
+  showNewCalendarDialog(): void {
     this.dialogs
-      .open(new PolymorpheusComponent(NewEventComponent, this.injector))
+      .open(new PolymorpheusComponent(NewCalendarComponent, this.injector))
       .subscribe({
         next: data => {
-          if (this.selectedCalendar?.calendarId && JSON.stringify(data)) {
-            this.onFetchEvents(this.selectedCalendar.calendarId);
+          if (JSON.stringify(data)) {
+            this.onFetchCalendars();
+          }
+        }
+      });
+  }
+
+  showNewEventDialog(): void {
+    if (!this.selectedCalendar?.calendarId) return;
+    const dialogInjector = Injector.create({
+      providers: [
+        {
+          provide: DIALOG_DATA,
+          useValue: { calendarId: this.selectedCalendar.calendarId }
+        }
+      ],
+      parent: this.injector
+    });
+
+    this.dialogs
+      .open(new PolymorpheusComponent(NewEventComponent, dialogInjector))
+      .subscribe({
+        next: data => {
+          if (JSON.stringify(data)) {
+            this.ngOnInit();
           }
         }
       });
@@ -136,6 +179,11 @@ export class BigCalendarComponent implements OnInit {
 
   handleReset(): void {
     this.monthIndex = dayjs().month();
+    this.miniCalendarValue = new TuiDay(
+      dayjs().year(),
+      dayjs().month(),
+      dayjs().date()
+    );
     this.handleCurrentMonth();
   }
 
