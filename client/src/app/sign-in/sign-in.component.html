@@ -18,13 +18,21 @@
             (ngSubmit)="onSubmit()"
             [formGroup]="signInForm"
           >
-            <tui-input formControlName="email">
+            <tui-input
+              required
+              inputmode="email"
+              tuiTextfield
+              formControlName="email"
+            >
               Email
-              <input name="email" inputmode="email" tuiTextfield required />
             </tui-input>
-            <tui-input-password formControlName="password">
+            <tui-input-password
+              required
+              tuiTextfield
+              name="password"
+              formControlName="password"
+            >
               Password
-              <input name="password" tuiTextfield required />
             </tui-input-password>
             <button
               tuiButton

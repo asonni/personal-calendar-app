@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
 import dayjs from 'dayjs';
+import { Injectable } from '@angular/core';
+import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
 @Injectable({
   providedIn: 'root'
@@ -19,5 +20,20 @@ export class UtilsService {
       });
     });
     return daysMatrix;
+  }
+
+  endDateAfterStartDateValidator(
+    startDateKey: string,
+    endDateKey: string
+  ): ValidatorFn {
+    return (formGroup: AbstractControl): ValidationErrors | null => {
+      const startDate = formGroup.get(startDateKey)?.value;
+      const endDate = formGroup.get(endDateKey)?.value;
+
+      if (startDate && endDate && endDate < startDate) {
+        return { endDateBeforeStartDate: true };
+      }
+      return null;
+    };
   }
 }

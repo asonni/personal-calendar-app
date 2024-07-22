@@ -1,6 +1,13 @@
 import dayjs from 'dayjs';
-import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
+import {
+  OnInit,
+  Inject,
+  Injector,
+  Component,
+  ChangeDetectionStrategy
+} from '@angular/core';
+import { PolymorpheusComponent } from '@tinkoff/ng-polymorpheus';
 import {
   TuiDataListWrapperModule,
   tuiItemsHandlersProvider,
@@ -11,9 +18,14 @@ import { AuthService } from '../auth/auth.service';
 import { Router } from '@angular/router';
 import { UtilsService } from '../utils/utils.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { TuiAlertService, TuiDataListModule } from '@taiga-ui/core';
+import {
+  TuiAlertService,
+  TuiDataListModule,
+  TuiDialogService
+} from '@taiga-ui/core';
 import { CalendarService } from '../services/calendar.service';
 import { EventService } from '../services/event.service';
+import { NewEventComponent } from '../events/new-event/new-event.component';
 
 type TCalendar = {
   calendarId: string;
@@ -52,7 +64,8 @@ type TEvent = {
     tuiItemsHandlersProvider({
       stringify: (item: TCalendar) => `${item.name}`
     })
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BigCalendarComponent implements OnInit {
   currentDay: any;
@@ -74,7 +87,9 @@ export class BigCalendarComponent implements OnInit {
     private authService: AuthService,
     private eventService: EventService,
     private calendarService: CalendarService,
-    @Inject(TuiAlertService) private readonly alerts: TuiAlertService
+    @Inject(Injector) private readonly injector: Injector,
+    @Inject(TuiAlertService) private readonly alerts: TuiAlertService,
+    @Inject(TuiDialogService) private readonly dialogs: TuiDialogService
   ) {
     this.handleCurrentMonth();
   }
@@ -84,6 +99,18 @@ export class BigCalendarComponent implements OnInit {
     if (this.selectedCalendar?.calendarId) {
       this.onFetchEvents(this.selectedCalendar.calendarId);
     }
+  }
+
+  showNewEventDialog(): void {
+    this.dialogs
+      .open(new PolymorpheusComponent(NewEventComponent, this.injector))
+      .subscribe({
+        next: data => {
+          if (this.selectedCalendar?.calendarId && JSON.stringify(data)) {
+            this.onFetchEvents(this.selectedCalendar.calendarId);
+          }
+        }
+      });
   }
 
   onChangeSelectedCalendar(newSelectedCalendar: TCalendar): void {
@@ -116,22 +143,8 @@ export class BigCalendarComponent implements OnInit {
     return day.format('DD-MM-YY') === dayjs().format('DD-MM-YY');
   }
 
-  isDateWithinPeriod(
-    startTime: string,
-    endTime: string,
-    currentDay: string
-  ): boolean {
-    const start = new Date(startTime);
-
-    const end = new Date(endTime);
-    const now = new Date(currentDay);
-
-    // Get the first and last date of the current month
-    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
-    // Check if the start and end times fall within the current month
-    return start >= firstDayOfMonth && end <= lastDayOfMonth;
+  isDateWithinPeriod(currentDay: string): boolean {
+    return currentDay === this.currentDay;
   }
 
   isTimeWithinSpecificDay(
@@ -185,7 +198,6 @@ export class BigCalendarComponent implements OnInit {
         startDay: this.datePipe.transform(event.startTime, 'dd'),
         endDay: this.datePipe.transform(event.endTime, 'dd')
       }));
-      console.log(this.events);
     } catch (error: any) {
       this.alerts
         .open('', { label: error?.message, status: 'error' })

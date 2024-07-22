@@ -1,16 +1,16 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  Inject,
-  OnInit
-} from '@angular/core';
-import { TuiInputModule, TuiInputPasswordModule } from '@taiga-ui/kit';
-import { TuiButtonModule, TuiAlertService } from '@taiga-ui/core';
 import { Router, RouterLink } from '@angular/router';
 import {
-  FormBuilder,
+  OnInit,
+  Inject,
+  Component,
+  ChangeDetectionStrategy
+} from '@angular/core';
+import { TuiButtonModule, TuiAlertService } from '@taiga-ui/core';
+import { TuiInputModule, TuiInputPasswordModule } from '@taiga-ui/kit';
+import {
   FormGroup,
   Validators,
+  FormBuilder,
   ReactiveFormsModule
 } from '@angular/forms';
 
@@ -20,11 +20,11 @@ import { AuthService } from '../auth/auth.service';
   selector: 'app-sign-in',
   standalone: true,
   imports: [
+    RouterLink,
     TuiInputModule,
-    TuiInputPasswordModule,
-    ReactiveFormsModule,
     TuiButtonModule,
-    RouterLink
+    ReactiveFormsModule,
+    TuiInputPasswordModule
   ],
   templateUrl: './sign-in.component.html',
   styleUrl: './sign-in.component.css',
