@@ -45,7 +45,12 @@ export class ForgotPasswordComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {}
+  async ngOnInit(): Promise<void> {
+    await this.authService.tryAutoLogin();
+    if (this.authService.isAuthenticated()) {
+      this.router.createUrlTree(['/calendar']);
+    }
+  }
 
   async onSubmit(): Promise<any> {
     try {

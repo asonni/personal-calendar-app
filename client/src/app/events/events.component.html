@@ -1,1 +1,80 @@
-<p>events works!</p>
+<tui-loader class="h-screen flex" [overlay]="true" [showLoader]="eventsLoading">
+  <table
+    tuiTable
+    [columns]="columns"
+    [tuiSortBy]="sorter$ | async"
+    class="w-full mx-auto pt-16 px-10"
+  >
+    <thead>
+      <tr tuiThGroup>
+        <th *tuiHead="'title'" tuiSortable tuiTh (click)="onSort('title')">
+          Title
+        </th>
+        <th
+          tuiTh
+          tuiSortable
+          *tuiHead="'description'"
+          (click)="onSort('description')"
+        >
+          Description
+        </th>
+        <th *tuiHead="'allDay'" tuiSortable tuiTh (click)="onSort('allDay')">
+          All day
+        </th>
+        <th
+          *tuiHead="'startTime'"
+          tuiSortable
+          tuiTh
+          (click)="onSort('startTime')"
+        >
+          Start Time
+        </th>
+        <th *tuiHead="'endTime'" tuiSortable tuiTh (click)="onSort('endTime')">
+          End Time
+        </th>
+        <th
+          *tuiHead="'location'"
+          tuiSortable
+          tuiTh
+          (click)="onSort('location')"
+        >
+          Location
+        </th>
+      </tr>
+    </thead>
+    <tbody tuiTbody>
+      <tr *ngFor="let item of events?.data" tuiTr>
+        <td *tuiCell="'title'" tuiTd>
+          {{ item.title }}
+        </td>
+        <td *tuiCell="'description'" tuiTd>
+          {{ item.description }}
+        </td>
+        <td *tuiCell="'allDay'" tuiTd>
+          {{ item.allDay ? 'Yes' : 'No' }}
+        </td>
+        <td *tuiCell="'startTime'" tuiTd>
+          {{ item.startTime | date: 'YYYY-MM-dd hh:mm a' }}
+        </td>
+        <td *tuiCell="'endTime'" tuiTd>
+          {{ item.endTime | date: 'YYYY-MM-dd hh:mm a' }}
+        </td>
+        <td *tuiCell="'location'" tuiTd>
+          {{ item.location }}
+        </td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td [colSpan]="columns.length">
+          <tui-table-pagination
+            class="tui-space_top-2"
+            [page]="events?.pagination?.currentPage! - 1 || 0"
+            [total]="events?.pagination?.totalItems || 0"
+            (pageChange)="onPage($event)"
+          ></tui-table-pagination>
+        </td>
+      </tr>
+    </tfoot>
+  </table>
+</tui-loader>

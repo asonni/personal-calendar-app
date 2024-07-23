@@ -1,14 +1,8 @@
 import dayjs from 'dayjs';
 import { TuiDay } from '@taiga-ui/cdk';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CommonModule, DatePipe } from '@angular/common';
-import {
-  OnInit,
-  Inject,
-  Injector,
-  Component,
-  ChangeDetectionStrategy
-} from '@angular/core';
+import { OnInit, Inject, Injector, Component } from '@angular/core';
 import { PolymorpheusComponent } from '@tinkoff/ng-polymorpheus';
 import {
   TuiSelectModule,
@@ -23,7 +17,8 @@ import {
   TuiButtonModule,
   TuiCalendarModule,
   TuiDataListModule,
-  TuiDialogService
+  TuiDialogService,
+  TuiLoaderModule
 } from '@taiga-ui/core';
 
 import { DIALOG_DATA } from '../dialog-tokens';
@@ -33,32 +28,13 @@ import { EventService } from '../services/event.service';
 import { CalendarService } from '../services/calendar.service';
 import { NewEventComponent } from '../events/new-event/new-event.component';
 import { NewCalendarComponent } from './new-calendar/new-calendar.component';
-
-type TCalendar = {
-  calendarId: string;
-  name: string;
-  description: string;
-  color: string;
-};
-
-type TEvent = {
-  eventId: string;
-  calendarId: string;
-  title: string;
-  description: string;
-  startTime: string;
-  endTime: string;
-  allDay: boolean;
-  startDate: string;
-  endDate: string;
-  startDay: number;
-  endDay: number;
-};
+import { TCalendar, TCustomEvent } from '../types';
 
 @Component({
   selector: 'app-big-calendar',
   standalone: true,
   imports: [
+    RouterLink,
     FormsModule,
     CommonModule,
     TuiSelectModule,
@@ -68,7 +44,8 @@ type TEvent = {
     TuiAccordionModule,
     ReactiveFormsModule,
     TuiRadioLabeledModule,
-    TuiDataListWrapperModule
+    TuiDataListWrapperModule,
+    TuiLoaderModule
   ],
   templateUrl: './big-calendar.component.html',
   styleUrl: './big-calendar.component.css',
@@ -77,8 +54,7 @@ type TEvent = {
     tuiItemsHandlersProvider({
       stringify: (item: TCalendar) => `${item.name}`
     })
-  ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  ]
 })
 export class BigCalendarComponent implements OnInit {
   currentDay: any;
@@ -91,7 +67,7 @@ export class BigCalendarComponent implements OnInit {
   calendars: TCalendar[] = [];
   calendarsLoading: boolean = false;
 
-  events: TEvent[] = [];
+  events: TCustomEvent[] = [];
   eventsLoading: boolean = false;
 
   constructor(
@@ -115,6 +91,12 @@ export class BigCalendarComponent implements OnInit {
     }
   }
 
+  navigateToEvents() {
+    const calendarId = this.selectedCalendar?.calendarId;
+    if (!calendarId) return;
+    this.router.navigate([`/calendar/${calendarId}/events`]);
+  }
+
   onClickMiniCalender(day: TuiDay): void {
     this.miniCalendarValue = day;
     this.monthIndex = day.month;
@@ -123,7 +105,9 @@ export class BigCalendarComponent implements OnInit {
 
   showNewCalendarDialog(): void {
     this.dialogs
-      .open(new PolymorpheusComponent(NewCalendarComponent, this.injector))
+      .open(new PolymorpheusComponent(NewCalendarComponent, this.injector), {
+        dismissible: !!this.calendars.length
+      })
       .subscribe({
         next: data => {
           if (JSON.stringify(data)) {
@@ -213,8 +197,11 @@ export class BigCalendarComponent implements OnInit {
       if (!this.authService.isAuthenticated()) {
         this.router.navigate(['/sign-in']);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      this.alerts
+        .open('', { label: error?.message, status: 'error' })
+        .subscribe();
     }
   }
 
@@ -225,6 +212,8 @@ export class BigCalendarComponent implements OnInit {
       this.calendars = this.calendarService.calendars;
       if (this.calendars.length) {
         this.selectedCalendar = this.calendars[0];
+      } else {
+        this.showNewCalendarDialog();
       }
     } catch (error: any) {
       this.alerts
@@ -238,8 +227,8 @@ export class BigCalendarComponent implements OnInit {
   async onFetchEvents(calendarId: string): Promise<any> {
     this.eventsLoading = true;
     try {
-      await this.eventService.onFetchEvents(calendarId);
-      this.events = this.eventService.events.map((event: any) => ({
+      await this.eventService.onFetchEvents({ calendarId });
+      this.events = this.eventService.events.data.map((event: any) => ({
         ...event,
         startDate: this.datePipe.transform(event.startTime, 'YYYY-MM-dd'),
         endDate: this.datePipe.transform(event.endTime, 'YYYY-MM-dd'),

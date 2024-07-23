@@ -20,13 +20,15 @@ export class AuthService {
       const response: AxiosResponse =
         await this.apiService.axiosClient.get('/auth/me');
       const { token, expiresIn } = response.data;
-      this.isLoggedIn = !!token;
-      if (this.isLoggedIn && new Date(expiresIn).getTime() > Date.now()) {
-        this.router.navigate(['/calendar']);
-      } else {
-        this.isLoggedIn = false;
-        this.router.navigate(['/sign-in']);
-      }
+      this.isLoggedIn = !!token && new Date(expiresIn).getTime() > Date.now();
+      // if (this.isLoggedIn && new Date(expiresIn).getTime() > Date.now()) {
+      //   // this.router.navigate([
+      //   //   '/calendar/373beac6-026b-4879-b6aa-462867af56ba/events'
+      //   // ]);
+      // } else {
+      //   this.isLoggedIn = false;
+      //   this.router.navigate(['/sign-in']);
+      // }
     } catch (error) {
       // Handle error
       this.isLoggedIn = false;

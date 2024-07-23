@@ -6,7 +6,7 @@ import {
   TuiRootModule,
   TuiDialogContext
 } from '@taiga-ui/core';
-import { Inject, Component, ChangeDetectionStrategy } from '@angular/core';
+import { Inject, Component } from '@angular/core';
 import {
   TuiInputModule,
   TuiTextareaModule,
@@ -42,8 +42,7 @@ import { DIALOG_DATA } from '../../dialog-tokens';
     TuiCheckboxLabeledModule
   ],
   templateUrl: './new-event.component.html',
-  styleUrl: './new-event.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  styleUrl: './new-event.component.css'
 })
 export class NewEventComponent {
   newEventForm: FormGroup;

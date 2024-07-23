@@ -6,6 +6,7 @@ import { SignUpComponent } from './sign-up/sign-up.component';
 import { BigCalendarComponent } from './big-calendar/big-calendar.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
+import { EventsComponent } from './events/events.component';
 
 export const routes: Routes = [
   {
@@ -32,6 +33,11 @@ export const routes: Routes = [
   {
     path: 'calendar',
     component: BigCalendarComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'calendar/:calendarId/events',
+    component: EventsComponent,
     canActivate: [AuthGuard]
   }
 ];

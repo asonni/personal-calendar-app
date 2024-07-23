@@ -6,7 +6,7 @@ import {
   UrlTree,
   Router
 } from '@angular/router';
-import { Observable } from 'rxjs';
+
 import { AuthService } from './auth.service';
 
 @Injectable({
@@ -18,15 +18,22 @@ export class AuthGuard implements CanActivate {
     private router: Router
   ) {}
 
-  canActivate(
+  async canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
-  ): boolean | UrlTree {
-    if (this.authService.isAuthenticated()) {
-      return true;
-    } else {
-      this.router.navigate(['/sign-in']);
-      return false;
+  ): Promise<boolean | UrlTree> {
+    try {
+      await this.authService.tryAutoLogin();
+      if (this.authService.isAuthenticated()) {
+        return true;
+      } else {
+        // Navigate to sign-in page if not authenticated
+        return this.router.createUrlTree(['/sign-in']);
+      }
+    } catch (error) {
+      console.error('Error during authentication check', error);
+      // Navigate to sign-in page in case of error
+      return this.router.createUrlTree(['/sign-in']);
     }
   }
 }

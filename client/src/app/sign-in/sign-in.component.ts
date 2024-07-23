@@ -46,7 +46,12 @@ export class SignInComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {}
+  async ngOnInit(): Promise<void> {
+    await this.authService.tryAutoLogin();
+    if (this.authService.isAuthenticated()) {
+      this.router.navigate(['/calendar']);
+    }
+  }
 
   async onSubmit(): Promise<any> {
     try {

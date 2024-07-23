@@ -6,7 +6,7 @@ import {
   TuiRootModule,
   TuiDialogContext
 } from '@taiga-ui/core';
-import { Inject, Component, ChangeDetectionStrategy } from '@angular/core';
+import { Inject, Component } from '@angular/core';
 import {
   TuiInputModule,
   TuiTextareaModule,
@@ -36,8 +36,7 @@ import { CalendarService } from '../../services/calendar.service';
     TuiInputColorModule
   ],
   templateUrl: './new-calendar.component.html',
-  styleUrl: './new-calendar.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  styleUrl: './new-calendar.component.css'
 })
 export class NewCalendarComponent {
   newCalendarForm: FormGroup;

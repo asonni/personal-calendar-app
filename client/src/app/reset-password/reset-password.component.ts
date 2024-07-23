@@ -2,7 +2,8 @@ import {
   Component,
   Input,
   Inject,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
+  OnInit
 } from '@angular/core';
 import { TuiInputModule, TuiInputPasswordModule } from '@taiga-ui/kit';
 import { TuiButtonModule, TuiAlertService } from '@taiga-ui/core';
@@ -30,7 +31,7 @@ import { AuthService } from '../auth/auth.service';
   styleUrl: './reset-password.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ResetPasswordComponent {
+export class ResetPasswordComponent implements OnInit {
   isLoading: boolean = false;
   resetPasswordForm: FormGroup;
 
@@ -43,6 +44,13 @@ export class ResetPasswordComponent {
     this.resetPasswordForm = this.fb.group({
       newPassword: ['', [Validators.required, Validators.minLength(6)]]
     });
+  }
+
+  async ngOnInit(): Promise<void> {
+    await this.authService.tryAutoLogin();
+    if (this.authService.isAuthenticated()) {
+      this.router.navigate(['/calendar']);
+    }
   }
 
   @Input() resettoken!: string;
