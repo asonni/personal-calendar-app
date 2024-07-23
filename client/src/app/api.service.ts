@@ -4,6 +4,8 @@ import { Injectable } from '@angular/core';
 
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 
+import { environment } from '../environments/environment';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -12,7 +14,7 @@ export class ApiService {
 
   constructor() {
     this.axiosClient = axios.create({
-      baseURL: `http://localhost:8080/api/v1`,
+      baseURL: environment.apiUrl,
       timeout: 10000,
       withCredentials: true,
       headers: {
