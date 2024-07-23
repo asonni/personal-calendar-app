@@ -2,12 +2,7 @@ import { Injectable } from '@angular/core';
 
 // const { APP_BASE_URL, APP_API_VER } = process.env;
 
-import axios, {
-  AxiosInstance,
-  AxiosRequestConfig,
-  AxiosResponse,
-  AxiosError
-} from 'axios';
+import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 
 @Injectable({
   providedIn: 'root'

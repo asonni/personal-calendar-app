@@ -11,8 +11,8 @@ services:
     ports:
       - '5432:5432'
 
-  api:
-    build: ./api
+  server:
+    build: ./server
     ports:
       - '8080:8080'
     environment:
@@ -24,9 +24,9 @@ services:
     depends_on:
       - db
 
-  frontend:
-    build: ./frontend
+  client:
+    build: ./client
     ports:
       - '4200:4200'
     depends_on:
-      - api
+      - server

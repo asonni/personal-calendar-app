@@ -1,7 +1,8 @@
 module.exports = {
   apps: [
     {
-      name: 'personal-calendar-app-api', // The name of your application
+      namespace: 'personal-calendar-app-server',
+      name: 'personal-calendar-app-server', // The name of your application
       script: './dist/src/server.js', // The script to run
       instances: 'max', // Number of instances to start
       autorestart: true, // Whether to restart apps on failure
