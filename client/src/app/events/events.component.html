@@ -1,9 +1,97 @@
-<tui-loader class="h-screen flex" [overlay]="true" [showLoader]="eventsLoading">
+<tui-loader class="h-screen" [overlay]="true" [showLoader]="eventsLoading">
+  <header class="flex items-center justify-end border-b border-gray-200 p-7">
+    <div class="flex items-center justify-start gap-x-4">
+      <button
+        size="s"
+        tuiButton
+        type="button"
+        class="!rounded-md"
+        (click)="showNewEventDialog()"
+      >
+        Add event
+      </button>
+      <div class="h-6 w-px bg-gray-300"></div>
+      <button
+        size="s"
+        tuiButton
+        type="button"
+        class="!rounded-md"
+        appearance="secondary"
+        (click)="onClickMyCalendars()"
+      >
+        My calendars
+      </button>
+      <div class="h-6 w-px bg-gray-300"></div>
+      <button
+        size="s"
+        tuiButton
+        type="button"
+        appearance="accent"
+        class="!rounded-md"
+      >
+        Logout
+      </button>
+    </div>
+  </header>
+  <form
+    [formGroup]="findForm"
+    (ngSubmit)="onFindSubmit()"
+    class="grid grid-cols-12 gap-4 px-10 py-8"
+  >
+    <tui-select tuiTextfieldSize="s" formControlName="searchBy">
+      Search by
+      <input tuiTextfield placeholder="Choose search by" />
+      <tui-data-list-wrapper
+        *tuiDataList
+        [items]="searchByItems"
+      ></tui-data-list-wrapper>
+    </tui-select>
+    <tui-input tuiTextfield formControlName="searchValue">
+      Search value
+    </tui-input>
+    <tui-select tuiTextfieldSize="s" formControlName="filterBy">
+      Filter by
+      <input tuiTextfield placeholder="Choose filter by" />
+      <tui-data-list-wrapper
+        *tuiDataList
+        [items]="filterByItems"
+      ></tui-data-list-wrapper>
+    </tui-select>
+    <tui-input
+      tuiTextfield
+      formControlName="filterValue"
+      *ngIf="findForm.value.filterBy !== 'All day'"
+    >
+      Filter value
+    </tui-input>
+    <tui-select
+      tuiTextfieldSize="s"
+      formControlName="filterValue"
+      *ngIf="findForm.value.filterBy === 'All day'"
+    >
+      Filter value
+      <input tuiTextfield />
+      <tui-data-list-wrapper
+        *tuiDataList
+        [items]="['Yes', 'No']"
+      ></tui-data-list-wrapper>
+    </tui-select>
+    <button tuiButton type="submit" class="!rounded-md">Find</button>
+    <button
+      tuiButton
+      type="button"
+      (click)="onFindReset()"
+      class="!rounded-md"
+      appearance="outline"
+    >
+      Reset
+    </button>
+  </form>
   <table
     tuiTable
     [columns]="columns"
+    class="w-full px-10"
     [tuiSortBy]="sorter$ | async"
-    class="w-full mx-auto pt-16 px-10"
   >
     <thead>
       <tr tuiThGroup>

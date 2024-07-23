@@ -24,11 +24,11 @@ import {
 import { DIALOG_DATA } from '../dialog-tokens';
 import { AuthService } from '../auth/auth.service';
 import { UtilsService } from '../utils/utils.service';
+import type { TCalendar, TCustomEvent } from '../types';
 import { EventService } from '../services/event.service';
 import { CalendarService } from '../services/calendar.service';
 import { NewEventComponent } from '../events/new-event/new-event.component';
 import { NewCalendarComponent } from './new-calendar/new-calendar.component';
-import { TCalendar, TCustomEvent } from '../types';
 
 @Component({
   selector: 'app-big-calendar',
