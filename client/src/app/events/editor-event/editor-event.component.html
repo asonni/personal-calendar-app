@@ -13,25 +13,27 @@
     [formGroup]="editorEventForm"
   >
     <tui-input formControlName="title" tuiTextfield required> Title </tui-input>
-    <div *ngIf="!editorEventForm.value.allDay" class="grid grid-cols-2 gap-2">
-      <tui-input-date-time formControlName="startTime">
-        Choose start date and time
-        <input tuiTextfield />
-      </tui-input-date-time>
-      <tui-input-date-time formControlName="endTime">
-        Choose end date and time
-        <input tuiTextfield />
-      </tui-input-date-time>
-    </div>
-    <div *ngIf="editorEventForm.value.allDay" class="grid grid-cols-2 gap-2">
-      <tui-input-date formControlName="startTime">
+    <div class="grid grid-cols-2 gap-2">
+      <tui-input-date formControlName="startDate">
         Choose start date
-        <input tuiTextfield name="startTime" />
       </tui-input-date>
-      <tui-input-date formControlName="endTime">
+      <tui-input-time
+        [items]="timePeriods"
+        formControlName="startTime"
+        *ngIf="!editorEventForm.value.allDay"
+      >
+        Choose start time
+      </tui-input-time>
+      <tui-input-date formControlName="endDate">
         Choose end date
-        <input tuiTextfield name="endTime" />
       </tui-input-date>
+      <tui-input-time
+        [items]="timePeriods"
+        formControlName="endTime"
+        *ngIf="!editorEventForm.value.allDay"
+      >
+        Choose end time
+      </tui-input-time>
     </div>
     <div
       class="text-rose-500"
@@ -39,10 +41,7 @@
     >
       End date must be after start date.
     </div>
-    <tui-checkbox-labeled
-      formControlName="allDay"
-      (ngModelChange)="onChangeAllDay()"
-    >
+    <tui-checkbox-labeled formControlName="allDay">
       <p class="font-medium">All day</p>
     </tui-checkbox-labeled>
     <tui-textarea formControlName="description" required>

@@ -13,7 +13,9 @@ import {
   TuiTextareaModule,
   TuiInputDateModule,
   TuiInputDateTimeModule,
-  TuiCheckboxLabeledModule
+  TuiCheckboxLabeledModule,
+  TuiInputTimeModule,
+  tuiCreateTimePeriods
 } from '@taiga-ui/kit';
 import {
   FormGroup,
@@ -41,7 +43,8 @@ import { EventService } from '../../services/event.service';
     TuiInputDateModule,
     ReactiveFormsModule,
     TuiInputDateTimeModule,
-    TuiCheckboxLabeledModule
+    TuiCheckboxLabeledModule,
+    TuiInputTimeModule
   ],
   templateUrl: './editor-event.component.html',
   styleUrl: './editor-event.component.css'
@@ -50,6 +53,7 @@ export class EditorEventComponent {
   editorEventForm: FormGroup;
   isLoading: boolean = false;
   eventId: string = '';
+  timePeriods = tuiCreateTimePeriods();
 
   constructor(
     private router: Router,
@@ -67,30 +71,20 @@ export class EditorEventComponent {
         title: ['', [Validators.required]],
         description: ['', [Validators.required]],
         location: ['', [Validators.required]],
-        startTime: [miniCalendarValue, [Validators.required]],
-        endTime: [miniCalendarValue, [Validators.required]],
+        startDate: [miniCalendarValue, [Validators.required]],
+        endDate: [miniCalendarValue, [Validators.required]],
+        startTime: [null, [Validators.required]],
+        endTime: [null, [Validators.required]],
         allDay: [true]
       },
       {
-        validators: this.utils.endDateAfterStartDateValidator(
-          'startTime',
-          'endTime'
-        )
+        validators: [
+          this.utils.endDateAfterStartDateValidator('startDate', 'endDate'),
+          this.utils.endDateAfterStartDateValidator('startTime', 'endTime')
+        ]
       }
     );
     this.onFetchEvent();
-  }
-
-  onChangeAllDay() {
-    const { title, description, allDay, location } = this.eventService.event;
-    this.editorEventForm.setValue({
-      title,
-      allDay,
-      location,
-      description,
-      startTime: null,
-      endTime: null
-    });
   }
 
   async onFetchEvent(): Promise<any> {
@@ -107,12 +101,10 @@ export class EditorEventComponent {
         allDay,
         location,
         description,
-        startTime: allDay
-          ? this.utils.transformDateToTuiDay(new Date(startTime))
-          : this.utils.transformDateTimeToTuiDay(new Date(startTime)),
-        endTime: allDay
-          ? this.utils.transformDateToTuiDay(new Date(endTime))
-          : this.utils.transformDateTimeToTuiDay(new Date(endTime))
+        startDate: this.utils.transformDateToTuiDay(startTime),
+        endDate: this.utils.transformDateToTuiDay(endTime),
+        startTime: this.utils.transformTimeToTuiTime(startTime),
+        endTime: this.utils.transformTimeToTuiTime(endTime)
       });
     } catch (error: any) {
       this.alerts
@@ -129,14 +121,20 @@ export class EditorEventComponent {
     try {
       if (this.editorEventForm.valid) {
         this.isLoading = true;
-        const { title, description, location, allDay, startTime, endTime } =
-          this.editorEventForm.value;
-        const transformedStartTime = allDay
-          ? this.utils.transformTuiDayToDate(startTime)
-          : this.utils.transformTuiDayToDateTime(startTime);
-        const transformedEndTime = allDay
-          ? this.utils.transformTuiDayToDate(endTime)
-          : this.utils.transformTuiDayToDateTime(endTime);
+        const {
+          title,
+          description,
+          location,
+          allDay,
+          startDate,
+          endDate,
+          startTime,
+          endTime
+        } = this.editorEventForm.value;
+        const transformStartDateTime =
+          this.utils.transformTuiDayTuiTimeToDateTime([startDate, startTime]);
+        const transformEndDateTime =
+          this.utils.transformTuiDayTuiTimeToDateTime([endDate, endTime]);
         if (eventId) {
           await this.eventService.onUpdateEvent({
             calendarId,
@@ -145,8 +143,8 @@ export class EditorEventComponent {
             description,
             location,
             allDay,
-            startTime: transformedStartTime,
-            endTime: transformedEndTime
+            startTime: transformStartDateTime,
+            endTime: transformEndDateTime
           });
         } else {
           await this.eventService.onCreateEvent({
@@ -156,8 +154,8 @@ export class EditorEventComponent {
             description,
             location,
             allDay,
-            startTime: transformedStartTime,
-            endTime: transformedEndTime
+            startTime: transformStartDateTime,
+            endTime: transformEndDateTime
           });
         }
         this.context.completeWith(true);
