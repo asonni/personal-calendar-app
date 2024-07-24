@@ -99,7 +99,7 @@
                 tuiButton
                 type="button"
                 class="!rounded-md"
-                (click)="showNewEventDialog()"
+                (click)="showEditorEventDialog()"
               >
                 Add event
               </button>
@@ -163,8 +163,9 @@
                   <ol class="mt-2 space-y-2">
                     <ng-container *ngFor="let event of events">
                       <li
+                        (click)="onClickSpecificEvent(event)"
                         [ngClass]="{
-                          'group flex justify-between border rounded-md px-2 border-sky-500': true,
+                          'group flex justify-between border rounded-md px-2 border-sky-500 cursor-pointer': true,
                           'bg-white': !event.allDay,
                           'bg-sky-500 text-white': event.allDay
                         }"

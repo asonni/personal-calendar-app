@@ -17,7 +17,7 @@ import { PolymorpheusComponent } from '@tinkoff/ng-polymorpheus';
 import type { TEvents, TKey } from '../types';
 import { DIALOG_DATA } from '../dialog-tokens';
 import { EventService } from '../services/event.service';
-import { NewEventComponent } from './new-event/new-event.component';
+import { EditorEventComponent } from './editor-event/editor-event.component';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import {
   TuiDataListWrapperModule,
@@ -122,7 +122,7 @@ export class EventsComponent implements OnInit {
     this.router.navigate(['/calendar']);
   }
 
-  showNewEventDialog(): void {
+  showEditorEventDialog(): void {
     if (!this.calendarId) return;
     const dialogInjector = Injector.create({
       providers: [
@@ -135,7 +135,7 @@ export class EventsComponent implements OnInit {
     });
 
     this.dialogs
-      .open(new PolymorpheusComponent(NewEventComponent, dialogInjector))
+      .open(new PolymorpheusComponent(EditorEventComponent, dialogInjector))
       .subscribe({
         next: data => {
           if (JSON.stringify(data)) {

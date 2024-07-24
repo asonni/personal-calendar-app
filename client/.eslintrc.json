@@ -28,9 +28,9 @@
             "style": "kebab-case"
           }
         ],
-        "@angular-eslint/no-empty-lifecycle-method": "off",
+        "no-useless-catch": "off",
         "@typescript-eslint/no-explicit-any": "off",
-        "no-useless-catch": "off"
+        "@angular-eslint/no-empty-lifecycle-method": "off"
       }
     },
     {
@@ -39,7 +39,10 @@
         "plugin:@angular-eslint/template/recommended",
         "plugin:@angular-eslint/template/accessibility"
       ],
-      "rules": {}
+      "rules": {
+        "@angular-eslint/template/click-events-have-key-events": "off",
+        "@angular-eslint/template/interactive-supports-focus": "off"
+      }
     }
   ]
 }

@@ -27,7 +27,7 @@ import { UtilsService } from '../utils/utils.service';
 import type { TCalendar, TCustomEvent } from '../types';
 import { EventService } from '../services/event.service';
 import { CalendarService } from '../services/calendar.service';
-import { NewEventComponent } from '../events/new-event/new-event.component';
+import { EditorEventComponent } from '../events/editor-event/editor-event.component';
 import { NewCalendarComponent } from './new-calendar/new-calendar.component';
 
 @Component({
@@ -63,6 +63,7 @@ export class BigCalendarComponent implements OnInit {
   miniCalendarValue: TuiDay | null = null;
 
   selectedCalendar: TCalendar | null = null;
+  selectedEventId: string = '';
 
   calendars: TCalendar[] = [];
   calendarsLoading: boolean = false;
@@ -91,16 +92,15 @@ export class BigCalendarComponent implements OnInit {
     }
   }
 
+  onClickSpecificEvent(event: TCustomEvent) {
+    this.selectedEventId = event.eventId;
+    this.showEditorEventDialog();
+  }
+
   navigateToEvents() {
     const calendarId = this.selectedCalendar?.calendarId;
     if (!calendarId) return;
     this.router.navigate([`/calendar/${calendarId}/events`]);
-  }
-
-  onClickMiniCalender(day: TuiDay): void {
-    this.miniCalendarValue = day;
-    this.monthIndex = day.month;
-    this.handleCurrentMonth();
   }
 
   showNewCalendarDialog(): void {
@@ -117,31 +117,54 @@ export class BigCalendarComponent implements OnInit {
       });
   }
 
-  showNewEventDialog(): void {
+  showEditorEventDialog(): void {
     if (!this.selectedCalendar?.calendarId) return;
     const dialogInjector = Injector.create({
       providers: [
         {
           provide: DIALOG_DATA,
-          useValue: { calendarId: this.selectedCalendar.calendarId }
+          useValue: {
+            eventId: this.selectedEventId,
+            miniCalendarValue: this.miniCalendarValue,
+            calendarId: this.selectedCalendar.calendarId
+          }
         }
       ],
       parent: this.injector
     });
 
     this.dialogs
-      .open(new PolymorpheusComponent(NewEventComponent, dialogInjector))
+      .open(new PolymorpheusComponent(EditorEventComponent, dialogInjector))
       .subscribe({
         next: data => {
           if (JSON.stringify(data)) {
             this.ngOnInit();
           }
+        },
+        complete: () => {
+          this.selectedEventId = '';
+          this.miniCalendarValue = null;
         }
       });
   }
 
   onChangeSelectedCalendar(newSelectedCalendar: TCalendar): void {
     this.onFetchEvents(newSelectedCalendar.calendarId);
+  }
+
+  onClickMiniCalender(day: TuiDay): void {
+    this.miniCalendarValue = day;
+    this.monthIndex = day.month;
+    this.handleCurrentMonth();
+    this.showEditorEventDialog();
+  }
+
+  handleChangeMiniCalendar(monthIndex: number): void {
+    this.miniCalendarValue = new TuiDay(
+      dayjs(new Date(dayjs().year(), monthIndex)).year(),
+      dayjs(new Date(dayjs().year(), monthIndex)).month(),
+      dayjs().date()
+    );
   }
 
   handleCurrentMonth(): void {
@@ -154,11 +177,13 @@ export class BigCalendarComponent implements OnInit {
   handlePrevMonth(): void {
     this.monthIndex -= 1;
     this.handleCurrentMonth();
+    this.handleChangeMiniCalendar(this.monthIndex);
   }
 
   handleNextMonth(): void {
     this.monthIndex += 1;
     this.handleCurrentMonth();
+    this.handleChangeMiniCalendar(this.monthIndex);
   }
 
   handleReset(): void {
@@ -230,10 +255,18 @@ export class BigCalendarComponent implements OnInit {
       await this.eventService.onFetchEvents({ calendarId });
       this.events = this.eventService.events.data.map((event: any) => ({
         ...event,
-        startDate: this.datePipe.transform(event.startTime, 'YYYY-MM-dd'),
-        endDate: this.datePipe.transform(event.endTime, 'YYYY-MM-dd'),
-        startDay: this.datePipe.transform(event.startTime, 'dd'),
-        endDay: this.datePipe.transform(event.endTime, 'dd')
+        startTime: event.startTime.slice(0, -1),
+        endTime: event.endTime.slice(0, -1),
+        startDate: this.datePipe.transform(
+          event.startTime.slice(0, -1),
+          'YYYY-MM-dd'
+        ),
+        endDate: this.datePipe.transform(
+          event.endTime.slice(0, -1),
+          'YYYY-MM-dd'
+        ),
+        startDay: this.datePipe.transform(event.startTime.slice(0, -1), 'dd'),
+        endDay: this.datePipe.transform(event.endTime.slice(0, -1), 'dd')
       }));
     } catch (error: any) {
       this.alerts

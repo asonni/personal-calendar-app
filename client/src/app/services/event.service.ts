@@ -16,6 +16,17 @@ export class EventService {
     }
   };
 
+  event: TEvent = {
+    calendarId: '',
+    eventId: '',
+    title: '',
+    description: '',
+    startTime: '',
+    endTime: '',
+    location: '',
+    allDay: false
+  };
+
   constructor(private apiService: ApiService) {}
 
   async onFetchEvents({
@@ -51,6 +62,27 @@ export class EventService {
     }
   }
 
+  async onFetchEvent({
+    calendarId,
+    eventId
+  }: {
+    calendarId: string;
+    eventId: string;
+  }): Promise<any> {
+    try {
+      const response = await this.apiService.axiosClient.get(
+        `/calendars/${calendarId}/events/${eventId}`
+      );
+      this.event = {
+        ...response.data.data,
+        startTime: response.data.data.startTime.slice(0, -1),
+        endTime: response.data.data.endTime.slice(0, -1)
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async onCreateEvent({
     calendarId,
     title,
@@ -59,7 +91,7 @@ export class EventService {
     endTime,
     location,
     allDay
-  }: TEvent): Promise<any> {
+  }: Partial<TEvent>): Promise<any> {
     try {
       await this.apiService.axiosClient.post(
         `/calendars/${calendarId}/events`,
@@ -71,6 +103,49 @@ export class EventService {
           location,
           allDay
         }
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async onUpdateEvent({
+    calendarId,
+    eventId,
+    title,
+    description,
+    startTime,
+    endTime,
+    location,
+    allDay
+  }: TEvent): Promise<any> {
+    try {
+      await this.apiService.axiosClient.put(
+        `/calendars/${calendarId}/events/${eventId}`,
+        {
+          title,
+          description,
+          startTime,
+          endTime,
+          location,
+          allDay
+        }
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async onDeleteEvent({
+    calendarId,
+    eventId
+  }: {
+    calendarId: string;
+    eventId: string;
+  }): Promise<any> {
+    try {
+      await this.apiService.axiosClient.delete(
+        `/calendars/${calendarId}/events/${eventId}`
       );
     } catch (error) {
       throw error;

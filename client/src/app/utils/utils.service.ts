@@ -38,14 +38,14 @@ export class UtilsService {
     };
   }
 
-  transformDate(date: TuiDay): string {
+  transformTuiDayToDate(date: TuiDay): string {
     const year = date.year;
     const month = (date.month + 1).toString().padStart(2, '0');
     const day = date.day.toString().padStart(2, '0');
     return `${year}-${month}-${day} 00:00:00+00`;
   }
 
-  transformDateTime(dateTime: [TuiDay, TuiTime]): string {
+  transformTuiDayToDateTime(dateTime: [TuiDay, TuiTime]): string {
     const [day, time] = dateTime;
     const year = day.year;
     const month = (day.month + 1).toString().padStart(2, '0');
@@ -53,6 +53,25 @@ export class UtilsService {
     const hours = time.hours.toString().padStart(2, '0');
     const minutes = time.minutes.toString().padStart(2, '0');
     const seconds = time.seconds.toString().padStart(2, '0');
+    console.log(`${year}-${month}-${date} ${hours}:${minutes}:${seconds}+00`);
     return `${year}-${month}-${date} ${hours}:${minutes}:${seconds}+00`;
+  }
+
+  transformDateToTuiDay(date: Date): TuiDay {
+    return new TuiDay(date.getFullYear(), date.getMonth(), date.getDate());
+  }
+
+  transformDateTimeToTuiDay(dateTime: Date): [TuiDay, TuiTime] {
+    const hours = dateTime.getHours().toString().padStart(2, '0');
+    const minutes = dateTime.getMinutes().toString().padStart(2, '0');
+    console.log({ dateTime, hours, minutes });
+    return [
+      new TuiDay(
+        dateTime.getFullYear(),
+        dateTime.getMonth(),
+        dateTime.getDate()
+      ),
+      new TuiTime(dateTime.getHours(), dateTime.getMinutes())
+    ];
   }
 }

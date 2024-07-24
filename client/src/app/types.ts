@@ -28,6 +28,7 @@ export type TRequestEvents = {
 
 export type TEvent = {
   calendarId: string;
+  eventId: string;
   title: string;
   description: string;
   startTime: string;
