@@ -147,7 +147,7 @@
               <ng-container *ngFor="let day of row; let j = index">
                 <div
                   [ngClass]="{
-                    'relative px-1': true,
+                    'pt-1 pl-1 border-r border-b border-gray-300': true,
                     'bg-white': currentDay === day.format('MMMM YYYY')
                   }"
                 >
@@ -160,7 +160,7 @@
                   <ng-template #elseBlock>
                     {{ day.format('DD') }}
                   </ng-template>
-                  <ol class="mt-2 space-y-2">
+                  <ol class="mt-2 pr-1 space-y-2">
                     <ng-container *ngFor="let event of events">
                       <li
                         (click)="onClickSpecificEvent(event)"

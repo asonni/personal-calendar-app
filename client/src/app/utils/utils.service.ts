@@ -50,9 +50,9 @@ export class UtilsService {
     const year = day.year;
     const month = (day.month + 1).toString().padStart(2, '0');
     const date = day.day.toString().padStart(2, '0');
-    const hours = time.hours.toString().padStart(2, '0');
-    const minutes = time.minutes.toString().padStart(2, '0');
-    const seconds = time.seconds.toString().padStart(2, '0');
+    const hours = time?.hours.toString().padStart(2, '0') || '00';
+    const minutes = time?.minutes.toString().padStart(2, '0') || '00';
+    const seconds = time?.seconds.toString().padStart(2, '0') || '00';
     return `${year}-${month}-${date} ${hours}:${minutes}:${seconds}+00`;
   }
 
