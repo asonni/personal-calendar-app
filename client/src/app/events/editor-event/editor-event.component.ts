@@ -1,4 +1,4 @@
-import { Inject, Component } from '@angular/core';
+import { Inject, Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { POLYMORPHEUS_CONTEXT } from '@tinkoff/ng-polymorpheus';
 import {
@@ -49,7 +49,7 @@ import { EventService } from '../../services/event.service';
   templateUrl: './editor-event.component.html',
   styleUrl: './editor-event.component.css'
 })
-export class EditorEventComponent {
+export class EditorEventComponent implements OnInit {
   editorEventForm: FormGroup;
   isLoading: boolean = false;
   eventId: string = '';
@@ -73,8 +73,8 @@ export class EditorEventComponent {
         location: ['', [Validators.required]],
         startDate: [miniCalendarValue, [Validators.required]],
         endDate: [miniCalendarValue, [Validators.required]],
-        startTime: [null, [Validators.required]],
-        endTime: [null, [Validators.required]],
+        startTime: [null],
+        endTime: [null],
         allDay: [true]
       },
       {
@@ -85,6 +85,28 @@ export class EditorEventComponent {
       }
     );
     this.onFetchEvent();
+  }
+
+  ngOnInit(): void {
+    this.editorEventForm.get('allDay')!.valueChanges.subscribe(value => {
+      if (value) {
+        this.removeRequiredValidators();
+      } else {
+        this.setRequiredValidators();
+      }
+      this.editorEventForm.get('startTime')!.updateValueAndValidity();
+      this.editorEventForm.get('endTime')!.updateValueAndValidity();
+    });
+  }
+
+  setRequiredValidators(): void {
+    this.editorEventForm.get('startTime')!.setValidators([Validators.required]);
+    this.editorEventForm.get('endTime')!.setValidators([Validators.required]);
+  }
+
+  removeRequiredValidators(): void {
+    this.editorEventForm.get('startTime')!.clearValidators();
+    this.editorEventForm.get('endTime')!.clearValidators();
   }
 
   async onFetchEvent(): Promise<any> {
