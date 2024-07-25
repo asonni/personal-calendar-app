@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import { CookieOptions, NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import validator from 'validator';
 
@@ -11,7 +11,6 @@ import ErrorResponse from '../utils/errorResponse';
 import sendEmail from '../utils/sendEmail';
 import { TAuthenticatedRequest } from '../utils/types';
 
-const NODE_ENV = process.env.NODE_ENV;
 const JWT_SECRET = process.env.JWT_SECRET as string;
 const JWT_EXPIRE = process.env.JWT_EXPIRE as string;
 const RESET_PASSWORD_EXPIRATION = parseInt(
@@ -36,16 +35,11 @@ const sendTokenResponse = (
     }
   );
 
-  const options: CookieOptions = {
+  const options = {
     expires: new Date(Date.now() + JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000),
     httpOnly: true,
-    secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
-    sameSite: false
+    secure: req.secure || req.headers['x-forwarded-proto'] === 'https'
   };
-
-  if (NODE_ENV === 'production') {
-    options.sameSite = 'none';
-  }
 
   return res
     .status(statusCode)
