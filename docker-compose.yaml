@@ -1,32 +1,24 @@
 version: '3.8'
 
 services:
-  db:
-    image: postgres
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: calendarapp
-    ports:
-      - '5432:5432'
-
   server:
     build: ./server
     ports:
       - '8080:8080'
     environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      DB_DATABASE: calendarapp
-    depends_on:
-      - db
-
-  client:
-    build: ./client
-    ports:
-      - '4200:4200'
-    depends_on:
-      - server
+      PORT: 8080
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRE: ${JWT_EXPIRE}
+      JWT_COOKIE_EXPIRE: ${JWT_COOKIE_EXPIRE}
+      RESET_PASSWORD_EXPIRATION: ${RESET_PASSWORD_EXPIRATION}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_EMAIL: ${SMTP_EMAIL}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      FROM_EMAIL: ${FROM_EMAIL}
+      FROM_NAME: ${FROM_NAME}
+      DATABASE_URL_DEVELOPMENT: ${DATABASE_URL_DEVELOPMENT}
+      DATABASE_URL_PRODUCTION: ${DATABASE_URL_PRODUCTION}
+      DATABASE_URL_TEST: ${DATABASE_URL_TEST}
+      WHITELIST: ${WHITELIST}
