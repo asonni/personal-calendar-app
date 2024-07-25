@@ -15,6 +15,7 @@
     "test:server": "npm test --prefix server",
     "build-client": "npm run build --prefix client",
     "build-server": "npm run build --prefix server",
+    "start-server": "npm run start --prefix server",
     "build": "npm run build-client && npm run build-server",
     "deploy": "npm run build --prefix client && npm start --prefix server",
     "deploy-cluster": "npm run build --prefix client && npm run build --prefix server && npm run cluster --prefix server"
