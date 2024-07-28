@@ -9,6 +9,7 @@ export const EventSchema = Type.Object({
   startTime: Type.String({ format: 'date-time' }),
   endTime: Type.String({ format: 'date-time' }),
   allDay: Type.Optional(Type.Boolean()),
+  color: Type.Optional(Type.String({ maxLength: 7 })),
   createdAt: Type.Optional(Type.String({ format: 'date-time' })),
   updatedAt: Type.Optional(Type.String({ format: 'date-time' }))
 });

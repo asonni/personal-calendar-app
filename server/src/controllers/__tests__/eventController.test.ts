@@ -36,7 +36,8 @@ describe('Event Controller', () => {
         location: 'Tripoli, Libya',
         startTime: '2024-07-01 13:31:33.455853+00',
         endTime: '2024-07-03 13:31:33.455853+00',
-        allDay: false
+        allDay: false,
+        color: '#1100FF'
       });
 
     await request(app)
@@ -48,7 +49,8 @@ describe('Event Controller', () => {
         location: 'Tripoli, Libya',
         startTime: '2024-07-04 13:31:33.455853+00',
         endTime: '2024-07-05 13:31:33.455853+00',
-        allDay: true
+        allDay: true,
+        color: '#1100EE'
       });
 
     response = await request(app)
@@ -83,7 +85,8 @@ describe('Event Controller', () => {
         location: 'Tripoli, Libya',
         startTime: '2024-07-01 13:31:33.455853+00',
         endTime: '2024-07-03 13:31:33.455853+00',
-        allDay: false
+        allDay: false,
+        color: '#1100FF'
       });
 
     const { eventId } = response.body.data;
@@ -119,16 +122,18 @@ describe('Event Controller', () => {
         location: 'Tripoli, Libya',
         startTime: '2024-07-01 13:31:33.455853+00',
         endTime: '2024-07-15 13:31:33.455853+00',
-        allDay: true
+        allDay: true,
+        color: '#1100FF'
       });
 
     const { eventId } = response.body.data;
 
     expect(response.status).toBe(201);
     expect(response.body.success).toBeTruthy();
-    expect(response.body.data).toHaveProperty('eventId', eventId);
-    expect(response.body.data).toHaveProperty('title', 'New event title');
     expect(response.body.data.allDay).toBeTruthy();
+    expect(response.body.data).toHaveProperty('eventId', eventId);
+    expect(response.body.data).toHaveProperty('color', '#1100FF');
+    expect(response.body.data).toHaveProperty('title', 'New event title');
   });
 
   it('should update event by ID', async () => {
@@ -152,7 +157,8 @@ describe('Event Controller', () => {
         location: 'Tripoli, Libya',
         startTime: '2024-07-01 13:31:33.455853+00',
         endTime: '2024-07-15 13:31:33.455853+00',
-        allDay: true
+        allDay: true,
+        color: '#1100FF'
       });
 
     const { eventId } = response.body.data;
@@ -166,7 +172,8 @@ describe('Event Controller', () => {
         location: 'Tripoli, Libya',
         startTime: '2024-07-01 13:31:33.455853+00',
         endTime: '2024-07-15 13:31:33.455853+00',
-        allDay: false
+        allDay: false,
+        color: '#1100EE'
       });
 
     expect(response.status).toBe(200);
@@ -175,6 +182,7 @@ describe('Event Controller', () => {
     expect(response.body.data).toHaveProperty('calendarId', calendarId);
     expect(response.body.data).toHaveProperty('eventId', eventId);
     expect(response.body.data).toHaveProperty('title', 'Updated event title');
+    expect(response.body.data).toHaveProperty('color', '#1100EE');
     expect(response.body.data.allDay).toBeFalsy();
   });
 
@@ -199,7 +207,8 @@ describe('Event Controller', () => {
         location: 'Tripoli, Libya',
         startTime: '2024-07-01 13:31:33.455853+00',
         endTime: '2024-07-15 13:31:33.455853+00',
-        allDay: true
+        allDay: true,
+        color: '#1100EE'
       });
 
     deletedEventId = response.body.data.eventId;
