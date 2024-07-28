@@ -6,7 +6,8 @@ import {
   TuiAlertService,
   TuiRootModule,
   TuiDialogContext,
-  TuiLoaderModule
+  TuiLoaderModule,
+  TuiDialogService
 } from '@taiga-ui/core';
 import {
   TuiInputModule,
@@ -15,7 +16,9 @@ import {
   TuiInputDateTimeModule,
   TuiCheckboxLabeledModule,
   TuiInputTimeModule,
-  tuiCreateTimePeriods
+  tuiCreateTimePeriods,
+  TuiPromptData,
+  TUI_PROMPT
 } from '@taiga-ui/kit';
 import {
   FormGroup,
@@ -60,6 +63,7 @@ export class EditorEventComponent implements OnInit {
     private fb: FormBuilder,
     private utils: UtilsService,
     private eventService: EventService,
+    @Inject(TuiDialogService) private readonly dialogs: TuiDialogService,
     @Inject(TuiAlertService) private readonly alerts: TuiAlertService,
     @Inject(DIALOG_DATA) public data: any,
     @Inject(POLYMORPHEUS_CONTEXT)
@@ -190,6 +194,28 @@ export class EditorEventComponent implements OnInit {
       this.isLoading = false;
       this.context.completeWith(false);
     }
+  }
+
+  onConfirmDeleteCalender(): void {
+    const data: TuiPromptData = {
+      content: 'You will delete this event!',
+      yes: 'Confirm',
+      no: 'Cancel'
+    };
+
+    this.dialogs
+      .open<boolean>(TUI_PROMPT, {
+        label: 'Are you sure you want delete?',
+        size: 's',
+        data
+      })
+      .subscribe({
+        next: data => {
+          if (data) {
+            this.onDeleteEvent();
+          }
+        }
+      });
   }
 
   async onDeleteEvent(): Promise<any> {

@@ -9,7 +9,9 @@ import {
   TuiAccordionModule,
   TuiDataListWrapperModule,
   tuiItemsHandlersProvider,
-  TuiRadioLabeledModule
+  TuiRadioLabeledModule,
+  TuiPromptData,
+  TUI_PROMPT
 } from '@taiga-ui/kit';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -28,7 +30,7 @@ import type { TCalendar, TCustomEvent } from '../types';
 import { EventService } from '../services/event.service';
 import { CalendarService } from '../services/calendar.service';
 import { EditorEventComponent } from '../events/editor-event/editor-event.component';
-import { NewCalendarComponent } from './new-calendar/new-calendar.component';
+import { EditorCalendarComponent } from './editor-calendar/editor-calendar.component';
 
 @Component({
   selector: 'app-big-calendar',
@@ -104,14 +106,58 @@ export class BigCalendarComponent implements OnInit {
   }
 
   showNewCalendarDialog(): void {
+    const dialogInjector = Injector.create({
+      providers: [
+        {
+          provide: DIALOG_DATA,
+          useValue: {
+            calendarId: ''
+          }
+        }
+      ],
+      parent: this.injector
+    });
+
     this.dialogs
-      .open(new PolymorpheusComponent(NewCalendarComponent, this.injector), {
-        dismissible: !!this.calendars.length
-      })
+      .open(
+        new PolymorpheusComponent(EditorCalendarComponent, dialogInjector),
+        {
+          dismissible: !!this.calendars.length
+        }
+      )
       .subscribe({
         next: data => {
           if (JSON.stringify(data)) {
             this.onFetchCalendars();
+          }
+        }
+      });
+  }
+
+  showUpdateCalendarDialog(): void {
+    const dialogInjector = Injector.create({
+      providers: [
+        {
+          provide: DIALOG_DATA,
+          useValue: {
+            calendarId: this.selectedCalendar?.calendarId
+          }
+        }
+      ],
+      parent: this.injector
+    });
+
+    this.dialogs
+      .open(
+        new PolymorpheusComponent(EditorCalendarComponent, dialogInjector),
+        {
+          dismissible: !!this.calendars.length
+        }
+      )
+      .subscribe({
+        next: data => {
+          if (JSON.stringify(data)) {
+            this.ngOnInit();
           }
         }
       });
@@ -148,8 +194,8 @@ export class BigCalendarComponent implements OnInit {
       });
   }
 
-  onChangeSelectedCalendar(newSelectedCalendar: TCalendar): void {
-    this.onFetchEvents(newSelectedCalendar.calendarId);
+  onChangeSelectedCalendar(selectedCalendar: TCalendar): void {
+    this.onFetchEvents(selectedCalendar.calendarId);
   }
 
   onClickMiniCalender(day: TuiDay): void {
@@ -214,6 +260,28 @@ export class BigCalendarComponent implements OnInit {
     const specific = new Date(specificDate);
 
     return start <= specific && end >= specific;
+  }
+
+  onConfirmLogout(): void {
+    const data: TuiPromptData = {
+      content: 'You are about to logout!',
+      yes: 'Confirm',
+      no: 'Cancel'
+    };
+
+    this.dialogs
+      .open<boolean>(TUI_PROMPT, {
+        label: 'Are you sure you want to logout?',
+        size: 'm',
+        data
+      })
+      .subscribe({
+        next: data => {
+          if (data) {
+            this.onLogout();
+          }
+        }
+      });
   }
 
   async onLogout(): Promise<any> {

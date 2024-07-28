@@ -22,15 +22,29 @@
             [items]="calendars"
           ></tui-data-list-wrapper>
         </tui-select>
-        <button
-          tuiIconButton
-          type="button"
-          icon="tuiIconPlus"
-          class="!rounded-md"
-          (click)="showNewCalendarDialog()"
-        >
-          New calendar
-        </button>
+        <div class="flex flex-col items-center justify-center gap-y-2">
+          <button
+            size="xs"
+            tuiIconButton
+            type="button"
+            icon="tuiIconPlus"
+            class="!rounded-md"
+            (click)="showNewCalendarDialog()"
+          >
+            New
+          </button>
+          <button
+            size="xs"
+            tuiIconButton
+            type="button"
+            icon="tuiIconEdit"
+            class="!rounded-md"
+            appearance="secondary"
+            (click)="showUpdateCalendarDialog()"
+          >
+            Update
+          </button>
+        </div>
       </div>
     </aside>
     <div class="flex h-full flex-col p-7 flex-1">
@@ -122,7 +136,7 @@
               type="button"
               appearance="accent"
               class="!rounded-md"
-              (click)="onLogout()"
+              (click)="onConfirmLogout()"
             >
               Logout
             </button>

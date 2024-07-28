@@ -1,0 +1,50 @@
+<div class="flex flex-col space-y-1.5 p-4">
+  <h3 class="text-2xl font-semibold leading-none tracking-tight">
+    {{ !!calendarId ? 'Update calendar' : 'New calendar' }}
+  </h3>
+  <p class="text-sm text-muted-foreground">
+    {{
+      !!calendarId
+        ? 'Update a calendar'
+        : 'Create a new calendar to get started'
+    }}
+  </p>
+</div>
+<tui-loader [overlay]="true" [showLoader]="isLoading">
+  <form
+    class="px-4 space-y-4"
+    (ngSubmit)="onSubmit()"
+    [formGroup]="editorCalendarForm"
+  >
+    <tui-input required formControlName="name" tuiTextfield> Name </tui-input>
+    <tui-textarea required formControlName="description">
+      Description
+    </tui-textarea>
+    <tui-input-color
+      required
+      tuiTextfield
+      formControlName="color"
+      [colors]="palette"
+    >
+      Color
+    </tui-input-color>
+    <button
+      tuiButton
+      type="submit"
+      class="w-full"
+      [disabled]="editorCalendarForm.invalid"
+    >
+      Save
+    </button>
+    <button
+      tuiButton
+      type="button"
+      class="w-full"
+      *ngIf="!!calendarId"
+      appearance="accent"
+      (click)="onConfirmDeleteCalender()"
+    >
+      Delete
+    </button>
+  </form>
+</tui-loader>
